@@ -99,7 +99,7 @@ def allChangeSetsFromLastSuccessfulBuild() {
   def changeSets = []
 
   for (int i = lastSuccessBuild + 1; i < currentBuildId; i++) {
-    echo "Getting Change Set for the Build ID : ${i}"
+    echo "Getting Change Set for   the Build ID : ${i}"
     def chageSet = job.getBuildByNumber(i).getChangeSets()
     changeSets.addAll(chageSet)
   }
