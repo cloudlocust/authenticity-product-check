@@ -45,7 +45,7 @@ pipeline {
         }
 
         stage("Install the Postgresql helm chart") {
-          steps {ku
+          steps {
             script {
               withKubeConfig([credentialsId: 'kubernetes_test']) {
                 sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID} || true"
