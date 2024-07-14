@@ -14,7 +14,6 @@ pipeline {
   }
 
   stages {
-
     stage('Static code analysing') {
       stages {
         stage('Install dependencies') {
