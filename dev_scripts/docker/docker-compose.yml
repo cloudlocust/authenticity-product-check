@@ -1,0 +1,49 @@
+version: '3'
+services:
+  authenticity-product-db:
+    container_name: authenticity-product-db
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      #we are creating multiple db's do not use this native creation env vars.
+      POSTGRES_PASSWORD: "123456"
+      POSTGRES_SIMPLE_USER: ${DB_USER}
+      POSTGRES_SIMPLE_USER_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB_NAME: ${DB_NAME}
+      POSTGRES_DB_UTEST_NAME: "authenticity_product_utest"
+    #    ports:
+    #      - "15432:5432"
+    volumes:
+      - ./initDB:/docker-entrypoint-initdb.d
+      - db-volume:/var/lib/postgresql/data
+
+  pgadmin4:
+    container_name: authenticity-product-pg
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "dev@shabakett.com"
+      PGADMIN_DEFAULT_PASSWORD: "123456"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
+
+    volumes:
+      - pgadmin4-data:/var/lib/pgadmin
+      - ./pgadmin4/config.json:/pgadmin4/servers.json
+
+    entrypoint:
+      - "/bin/sh"
+      - "-c"
+      - "/bin/echo '${DB_HOST}:5432:*:${DB_USER}:${DB_PASSWORD}' > /tmp/pgpassfile && chmod 600 /tmp/pgpassfile && /entrypoint.sh"
+    depends_on:
+      - authenticity-product-db
+
+volumes:
+  pgadmin4-data:
+  db-volume:
+
+
+networks:
+  default:
+    external: true
+    name: docker_default

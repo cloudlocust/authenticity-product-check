@@ -1,0 +1,7 @@
+__common__.json
+__pycache__
+.idea/
+.coverage
+reports/
+*.egg-info/
+.local.env
