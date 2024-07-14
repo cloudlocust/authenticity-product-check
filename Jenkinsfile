@@ -58,6 +58,7 @@ pipeline {
                 sh '''#!/bin/bash
                 echo $PORT_DB
                 '''
+                sh 'sleep 10m'
 
               }
             }
