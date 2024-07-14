@@ -45,7 +45,7 @@ pipeline {
         }
 
         stage("Install the Postgresql helm chart") {
-          steps {
+          steps {ku
             script {
               withKubeConfig([credentialsId: 'kubernetes_test']) {
                 sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID} || true"
@@ -60,24 +60,24 @@ pipeline {
 
   }
 
-// post {
-//   always {
-//     script {
-//       try {
-//         echo "build finished"
-//         withKubeConfig([credentialsId: 'kubernetes_test']) {
-//           sh "helm delete postgresql  --namespace testing-${ID}"
-// //           sh "kubectl wait --for=delete pod/postgresql-0 --timeout=60s --namespace testing-${ID}"
-//           sh "kubectl delete namespace testing-${ID}"
-//         }
-//         junit 'reports/*.xml'
-//       } catch (Exception e) {
-//         // Handle the exception (e.g., print an error message, log, etc.)
-//         echo "An exception occurred: ${e.getMessage()}"
-//       }
-//     }
-//   }
-// }
+post {
+  always {
+    script {
+      try {
+        echo "build finished"
+        withKubeConfig([credentialsId: 'kubernetes_test']) {
+          sh "helm delete postgresql  --namespace testing-${ID}"
+          sh "kubectl wait --for=delete pod/postgresql-0 --timeout=120s --namespace testing-${ID}"
+          sh "kubectl delete namespace testing-${ID}"
+        }
+        junit 'reports/*.xml'
+      } catch (Exception e) {
+        // Handle the exception (e.g., print an error message, log, etc.)
+        echo "An exception occurred: ${e.getMessage()}"
+      }
+    }
+  }
+}
 }
 def getEnvName(branchName) {
   // This function return staging by default.
