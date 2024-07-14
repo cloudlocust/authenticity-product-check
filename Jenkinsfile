@@ -94,8 +94,7 @@ def allChangeSetsFromLastSuccessfulBuild() {
   def jobName = "$JOB_NAME"
   def job = Jenkins.getInstance().getItemByFullName(jobName)
   def lastSuccessBuild = job.lastSuccessfulBuild.number as int
-  def currentBuildId = "$BUILD_ID"
-  as int
+  def currentBuildId = "$BUILD_ID" as int
 
   def changeSets = []
 
