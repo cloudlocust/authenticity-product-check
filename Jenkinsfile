@@ -66,7 +66,7 @@ post {
         echo "build finished"
         withKubeConfig([credentialsId: 'kubernetes_test']) {
           sh "helm delete postgresql  --namespace testing-${ID}"
-          sh "kubectl wait --for=delete pod/postgresql-0 --timeout=60s --namespace testing-${ID}"
+//           sh "kubectl wait --for=delete pod/postgresql-0 --timeout=60s --namespace testing-${ID}"
           sh "kubectl delete namespace testing-${ID}"
         }
         junit 'reports/*.xml'
