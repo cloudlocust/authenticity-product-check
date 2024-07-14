@@ -48,7 +48,7 @@ pipeline {
           steps {
             script {
               withKubeConfig([credentialsId: 'kubernetes_test']) {
-                sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID}"
+                sh "helm install postgresql bitnami/postgresql --version 14.2.0 -f tests/postgresql.yaml --namespace testing-${ID}"
               }
             }
           }
