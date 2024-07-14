@@ -50,7 +50,9 @@ pipeline {
               withKubeConfig([credentialsId: 'kubernetes_test']) {
                 sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID} || true"
                 sh "kubectl wait --for=condition=ready pod/postgresql-0 --timeout=1000s --namespace testing-${ID}"
-                sh "export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})"
+                sh '''#!/bin/bash
+                export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})
+                '''
                 sh "echo $PORT_DB"
 
               }
