@@ -1,3 +1,4 @@
+"""Database models for the application."""
 import os
 from datetime import datetime
 from typing import AsyncGenerator
@@ -48,9 +49,11 @@ async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
+    """Get async session."""
     async with async_session_maker() as session:
         yield session
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
+    """Get user database."""
     yield SQLAlchemyUserDatabase(session, User)

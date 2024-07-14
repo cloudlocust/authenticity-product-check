@@ -1,9 +1,7 @@
-"""First commit
-
+"""First commit:
 Revision ID: 9362bc9ad285
 Revises:
 Create Date: 2024-07-10 16:39:09.059619
-
 """
 import fastapi_users_db_sqlalchemy
 import sqlalchemy as sa
