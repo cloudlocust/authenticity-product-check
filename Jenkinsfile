@@ -66,7 +66,7 @@ pipeline {
                 export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})
                 export DB_HOST=${ADDRESS_DB}:${PORT_DB}
                 echo $DB_HOST
-                pipenv run coverage run --source=customer_center --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
+                pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
                 '''
             }
         }
