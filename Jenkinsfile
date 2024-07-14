@@ -48,7 +48,8 @@ pipeline {
           steps {
             script {
               withKubeConfig([credentialsId: 'kubernetes_test']) {
-                sh "helm install postgresql bitnami/postgresql --version 11.6.2 -f tests/postgresql.yaml --namespace testing-${ID}"
+                sh "helm install postgresql bitnami/postgresql --version 11.6.2 -f tests/postgresql.yaml --namespace testing-${ID} || true"
+                sh "kubectl wait --for=condition=ready pod/postgresql-0 --timeout=60s --namespace testing-${ID}"
               }
             }
           }
