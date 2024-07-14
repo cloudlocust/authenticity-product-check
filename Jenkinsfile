@@ -59,24 +59,24 @@ pipeline {
 
   }
 
-post {
-  always {
-    script {
-      try {
-        echo "build finished"
-        withKubeConfig([credentialsId: 'kubernetes_test']) {
-          sh "helm delete postgresql  --namespace testing-${ID}"
-//           sh "kubectl wait --for=delete pod/postgresql-0 --timeout=60s --namespace testing-${ID}"
-          sh "kubectl delete namespace testing-${ID}"
-        }
-        junit 'reports/*.xml'
-      } catch (Exception e) {
-        // Handle the exception (e.g., print an error message, log, etc.)
-        echo "An exception occurred: ${e.getMessage()}"
-      }
-    }
-  }
-}
+// post {
+//   always {
+//     script {
+//       try {
+//         echo "build finished"
+//         withKubeConfig([credentialsId: 'kubernetes_test']) {
+//           sh "helm delete postgresql  --namespace testing-${ID}"
+// //           sh "kubectl wait --for=delete pod/postgresql-0 --timeout=60s --namespace testing-${ID}"
+//           sh "kubectl delete namespace testing-${ID}"
+//         }
+//         junit 'reports/*.xml'
+//       } catch (Exception e) {
+//         // Handle the exception (e.g., print an error message, log, etc.)
+//         echo "An exception occurred: ${e.getMessage()}"
+//       }
+//     }
+//   }
+// }
 }
 def getEnvName(branchName) {
   // This function return staging by default.
