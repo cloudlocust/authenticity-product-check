@@ -53,7 +53,9 @@ pipeline {
                 sh '''#!/bin/bash
                 export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})
                 '''
-                sh "echo $PORT_DB"
+                sh '''#!/bin/bash
+                echo $PORT_DB
+                '''
 
               }
             }
