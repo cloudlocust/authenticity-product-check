@@ -14,6 +14,7 @@ pipeline {
   }
 
   stages {
+
     stage('Static code analysing') {
       stages {
         stage('Install dependencies') {
@@ -30,7 +31,7 @@ pipeline {
 
       }
     }
-    stage('Create a namespace and start the Postgresql and Rabbitmq instances ') {
+    stage('Create a namespace and start the Postgresql instances ') {
       stages {
         stage("Create the namespace and add the bitnami helm repository") {
           steps {
@@ -56,7 +57,19 @@ pipeline {
         }
       }
     }
-
+        stage('unit and integration tests'){
+            steps('Unit test'){
+                sh '''#!/bin/bash
+                kubectl wait --for=condition=ready pod postgresql-0 --timeout=120s --namespace testing-${ID}
+                export HOSTNAME_DB=$(kubectl get pods --selector=app.kubernetes.io/instance=postgresql -o jsonpath='{.items[].spec.nodeName}' -n testing-${ID})
+                export ADDRESS_DB=$(kubectl get nodes --selector=kubernetes.io/hostname=${HOSTNAME_DB} -o jsonpath='{.items[].status.addresses[?(@.type=="InternalIP")].address}' -n testing-${ID})
+                export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})
+                export DB_HOST=${ADDRESS_DB}:${PORT_DB}
+                echo $DB_HOST
+                pipenv run coverage run --source=customer_center --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
+                '''
+            }
+        }
   }
 
 post {
