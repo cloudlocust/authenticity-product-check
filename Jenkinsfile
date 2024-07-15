@@ -60,13 +60,37 @@ pipeline {
                 sh '''#!/bin/bash
                 kubectl wait --for=condition=ready pod postgresql-0 --timeout=120s --namespace testing-${ID}
                 export DB_HOST="postgresql.testing-${ID}.svc:5432"
-                echo $DB_HOST
                 pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
                 '''
             }
         }
   }
+        stage('build && SonarQube analysis') {
+            environment {
+                scannerHome = tool 'SonarQubeScanner'
+            }
+            steps {
+                withSonarQubeEnv('sonarqube') {
+                    sh "echo $PATH & echo $JAVA_HOME"
+                    sh "${scannerHome}/bin/sonar-scanner"
+                }
+            }
+        }
 
+        stage("Quality Gate") {
+             steps {
+                 script {
+                     timeout(time: 5, unit: 'MINUTES') {
+                         def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+                         if (qg.status != 'OK') {
+                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                         }
+                     }
+                 }
+             }
+        }
+
+}
 post {
   always {
     script {
@@ -84,7 +108,6 @@ post {
       }
     }
   }
-}
 }
 def getEnvName(branchName) {
   // This function return staging by default.
