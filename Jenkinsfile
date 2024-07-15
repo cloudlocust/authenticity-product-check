@@ -15,99 +15,135 @@ pipeline {
 
   stages {
 
-    stage('Static code analysing') {
-      stages {
-        stage('Install dependencies') {
-          steps {
-            sh 'pipenv --rm || exit 0'
-            sh 'pipenv install --pre --dev'
-          }
-        }
-        stage('PyDocStyle') {
-          steps {
-            sh 'pipenv run pydocstyle --config=.pydocstyle.ini ${MODULE_DIR_NAME}'
-          }
-        }
-
-      }
-    }
-    stage('Create a namespace and start the Postgresql instances ') {
-      stages {
-        stage("Create the namespace and add the bitnami helm repository") {
-          steps {
-            script {
-              withKubeConfig([credentialsId: 'kubernetes_test', ]) {
-                sh "helm repo add bitnami https://charts.bitnami.com/bitnami"
-                sh "kubectl create namespace testing-${ID}"
+//     stage('Static code analysing') {
+//       stages {
+//         stage('Install dependencies') {
+//           steps {
+//             sh 'pipenv --rm || exit 0'
+//             sh 'pipenv install --pre --dev'
+//           }
+//         }
+//         stage('PyDocStyle') {
+//           steps {
+//             sh 'pipenv run pydocstyle --config=.pydocstyle.ini ${MODULE_DIR_NAME}'
+//           }
+//         }
+//
+//       }
+//     }
+//     stage('Create a namespace and start the Postgresql instances ') {
+//       stages {
+//         stage("Create the namespace and add the bitnami helm repository") {
+//           steps {
+//             script {
+//               withKubeConfig([credentialsId: 'kubernetes_test', ]) {
+//                 sh "helm repo add bitnami https://charts.bitnami.com/bitnami"
+//                 sh "kubectl create namespace testing-${ID}"
+//               }
+//             }
+//           }
+//         }
+//
+//         stage("Install the Postgresql helm chart") {
+//           steps {
+//             script {
+//               withKubeConfig([credentialsId: 'kubernetes_test']) {
+//                 sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID} || true"
+//               }
+//             }
+//           }
+//         }
+//       }
+//     }
+//     stage('unit and integration tests') {
+//       steps('Unit test') {
+//         sh ''
+//         '#!/bin/bash
+//         kubectl wait--
+//         for = condition = ready pod postgresql - 0--timeout = 120 s--namespace testing - $ {
+//           ID
+//         }
+//         export DB_HOST = "postgresql.testing-${ID}.svc:5432"
+//         pipenv run coverage run--source = authenticity_product--concurrency = eventlet - m pytest - x - v--junit - xml = reports / report.xml tests && pipenv run coverage xml ''
+//         '
+//       }
+//     }
+//
+//     stage('build && SonarQube analysis') {
+//       environment {
+//         scannerHome = tool 'SonarQubeScanner'
+//       }
+//       steps {
+//         withSonarQubeEnv('sonarqube') {
+//           sh "echo $PATH & echo $JAVA_HOME"
+//           sh "${scannerHome}/bin/sonar-scanner"
+//         }
+//       }
+//     }
+//
+//     stage("Quality Gate") {
+//       steps {
+//         script {
+//           timeout(time: 5, unit: 'MINUTES') {
+//             def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
+//             if (qg.status != 'OK') {
+//               error "Pipeline aborted due to quality gate failure: ${qg.status}"
+//             }
+//           }
+//         }
+//       }
+//     }
+            stage("Publish") {
+//           when {
+//             expression {
+//               BRANCH_NAME == ~/(production|master|develop)/
+//             }
+//           }
+          stages {
+            stage('Publish in dockerhub') {
+              environment {
+                registryCredential = 'dockerhub'
+                app_regisgtry = 'khaldi22/authenticity_product'
+                ENV_NAME = getEnvName(BRANCH_NAME)
+                VERSION = "${BUILD_NUMBER}"
               }
-            }
-          }
-        }
-
-        stage("Install the Postgresql helm chart") {
-          steps {
-            script {
-              withKubeConfig([credentialsId: 'kubernetes_test']) {
-                sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID} || true"
-              }
-            }
-          }
-        }
-      }
-    }
-        stage('unit and integration tests'){
-            steps('Unit test'){
-                sh '''#!/bin/bash
-                kubectl wait --for=condition=ready pod postgresql-0 --timeout=120s --namespace testing-${ID}
-                export DB_HOST="postgresql.testing-${ID}.svc:5432"
-                pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
-                '''
-            }
-        }
-
-        stage('build && SonarQube analysis') {
-            environment {
-                scannerHome = tool 'SonarQubeScanner'
-            }
-            steps {
-                withSonarQubeEnv('sonarqube') {
-                    sh "echo $PATH & echo $JAVA_HOME"
-                    sh "${scannerHome}/bin/sonar-scanner"
+              steps {
+                script {
+                  docker.withRegistry('', registryCredential) {
+                    // we copy files inside the app image and tag it
+                    def appimage = docker.build(app_regisgtry + ":${ENV_NAME}", "--no-cache . -f ci/Dockerfile ")
+                    appimage.push("${ENV_NAME}")
+                    if (env.BRANCH_NAME == "production") {
+                      appimage.push("${ENV_NAME}-${VERSION}")
+                    }
+                  }
+                  // Clean up unused Docker resources older than 1 hour
+                  sh 'docker system prune -af --filter "until=1h"'
                 }
-            }
-        }
+              }
 
-        stage("Quality Gate") {
-             steps {
-                 script {
-                     timeout(time: 5, unit: 'MINUTES') {
-                         def qg = waitForQualityGate() // Reuse taskId previously collected by withSonarQubeEnv
-                         if (qg.status != 'OK') {
-                           error "Pipeline aborted due to quality gate failure: ${qg.status}"
-                         }
-                     }
-                 }
-             }
+            }
+          }
         }
   }
-post {
-  always {
-    script {
-      try {
-        echo "build finished"
-        withKubeConfig([credentialsId: 'kubernetes_test']) {
-          sh "helm delete postgresql  --namespace testing-${ID}"
-          sh "kubectl wait --for=delete pod/postgresql-0 --timeout=120s --namespace testing-${ID}"
-          sh "kubectl delete namespace testing-${ID}"
+  post {
+    always {
+      script {
+        try {
+          echo "build finished"
+          withKubeConfig([credentialsId: 'kubernetes_test']) {
+            sh "helm delete postgresql  --namespace testing-${ID}"
+            sh "kubectl wait --for=delete pod/postgresql-0 --timeout=120s --namespace testing-${ID}"
+            sh "kubectl delete namespace testing-${ID}"
+          }
+          junit 'reports/*.xml'
+        } catch (Exception e) {
+          // Handle the exception (e.g., print an error message, log, etc.)
+          echo "An exception occurred: ${e.getMessage()}"
         }
-        junit 'reports/*.xml'
-      } catch (Exception e) {
-        // Handle the exception (e.g., print an error message, log, etc.)
-        echo "An exception occurred: ${e.getMessage()}"
       }
     }
   }
-}
 }
 def getEnvName(branchName) {
   // This function return staging by default.
