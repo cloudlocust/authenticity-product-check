@@ -90,7 +90,6 @@ pipeline {
              }
         }
   }
-}
 post {
   always {
     script {
@@ -108,6 +107,7 @@ post {
       }
     }
   }
+}
 }
 def getEnvName(branchName) {
   // This function return staging by default.
