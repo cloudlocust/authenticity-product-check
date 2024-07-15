@@ -64,7 +64,7 @@ pipeline {
                 '''
             }
         }
-  }
+
         stage('build && SonarQube analysis') {
             environment {
                 scannerHome = tool 'SonarQubeScanner'
@@ -89,7 +89,7 @@ pipeline {
                  }
              }
         }
-
+  }
 }
 post {
   always {
