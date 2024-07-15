@@ -49,12 +49,6 @@ pipeline {
             script {
               withKubeConfig([credentialsId: 'kubernetes_test']) {
                 sh "helm install postgresql bitnami/postgresql -f tests/postgresql.yaml --namespace testing-${ID} || true"
-                sh "kubectl wait --for=condition=ready pod/postgresql-0 --timeout=1000s --namespace testing-${ID}"
-                sh 'export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})'
-                sh '''#!/bin/bash
-                echo $PORT_DB
-                '''
-
               }
             }
           }
@@ -65,10 +59,7 @@ pipeline {
             steps('Unit test'){
                 sh '''#!/bin/bash
                 kubectl wait --for=condition=ready pod postgresql-0 --timeout=120s --namespace testing-${ID}
-                export HOSTNAME_DB=$(kubectl get pods --selector=app.kubernetes.io/instance=postgresql -o jsonpath='{.items[].spec.nodeName}' -n testing-${ID})
-                export ADDRESS_DB=$(kubectl get nodes --selector=kubernetes.io/hostname=${HOSTNAME_DB} -o jsonpath='{.items[].status.addresses[?(@.type=="InternalIP")].address}' -n testing-${ID})
-                export PORT_DB=$(kubectl get -o jsonpath="{.spec.ports[0].nodePort}" services postgresql -n testing-${ID})
-                export DB_HOST=${ADDRESS_DB}:${PORT_DB}
+                export DB_HOST="postgresql.testing-${ID}.svc:5432"
                 echo $DB_HOST
                 pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
                 '''
