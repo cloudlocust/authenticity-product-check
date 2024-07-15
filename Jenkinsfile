@@ -61,7 +61,7 @@ pipeline {
         #!/bin/bash
         kubectl wait --for=condition=ready pod postgresql-0 --timeout=120s --namespace testing-${ID}
         export DB_HOST = "postgresql.testing-${ID}.svc:5432"
-        pipenv run coverage run--source = authenticity_product--concurrency = eventlet - m pytest - x - v--junit - xml = reports / report.xml tests && pipenv run coverage xml
+        pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
         '''
       }
     }
