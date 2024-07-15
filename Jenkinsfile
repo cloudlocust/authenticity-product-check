@@ -19,7 +19,6 @@ pipeline {
       stages {
         stage('Install dependencies') {
           steps {
-            sh 'sleep 10m'
             sh 'pipenv --rm || exit 0'
             sh 'pipenv install --pre --dev'
           }
