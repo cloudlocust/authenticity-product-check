@@ -15,22 +15,23 @@ pipeline {
 
   stages {
 
-//     stage('Static code analysing') {
-//       stages {
-//         stage('Install dependencies') {
-//           steps {
-//             sh 'pipenv --rm || exit 0'
-//             sh 'pipenv install --pre --dev'
-//           }
-//         }
-//         stage('PyDocStyle') {
-//           steps {
-//             sh 'pipenv run pydocstyle --config=.pydocstyle.ini ${MODULE_DIR_NAME}'
-//           }
-//         }
-//
-//       }
-//     }
+    stage('Static code analysing') {
+      stages {
+        stage('Install dependencies') {
+          steps {
+            sh 'sleep 10m'
+            sh 'pipenv --rm || exit 0'
+            sh 'pipenv install --pre --dev'
+          }
+        }
+        stage('PyDocStyle') {
+          steps {
+            sh 'pipenv run pydocstyle --config=.pydocstyle.ini ${MODULE_DIR_NAME}'
+          }
+        }
+
+      }
+    }
 //     stage('Create a namespace and start the Postgresql instances ') {
 //       stages {
 //         stage("Create the namespace and add the bitnami helm repository") {
