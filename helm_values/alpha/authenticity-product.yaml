@@ -8,15 +8,15 @@ global:
   imagePullPolicy: Always
   image:
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "staging"
+    tag: "alpha"
 
 ingress:
     path: /
-    host: staging.authenticity.product.khaldi.online
+    host: alpha.authenticity.product.khaldi.online
     secretName: shabakett-tls
 
 
-DB_HOST: postgresql.staging.svc
+DB_HOST: postgresql.alpha.svc
 DB_NAME: authenticity_product
 DB_USER: authenticity_product
 DB_PASSWORD: authenticity_product
