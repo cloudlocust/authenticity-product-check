@@ -91,11 +91,11 @@ pipeline {
       }
     }
     stage("Publish") {
-      //           when {
-      //             expression {
-      //               BRANCH_NAME == ~/(production|master|develop)/
-      //             }
-      //           }
+                when {
+                  expression {
+                    BRANCH_NAME == ~/(production|master|develop)/
+                  }
+                }
       stages {
         stage('Publish in dockerhub') {
           environment {
@@ -122,6 +122,21 @@ pipeline {
         }
       }
     }
+       stage ('Deploy') {
+        when{
+             expression { BRANCH_NAME ==~ /(master|develop|production)/ }
+        }
+        environment {
+              ENV_NAME = getEnvName(BRANCH_NAME)
+           }
+            steps{
+                script{
+                     withKubeConfig([credentialsId:'kubernetes_test']){
+                        sh "helm upgrade --install  authenticity-product  authenticity-product-chart/ -f helm_values/authenticity-product.yaml -n ${ENV_NAME}"
+                     }
+                }
+            }
+       }
   }
   post {
     always {

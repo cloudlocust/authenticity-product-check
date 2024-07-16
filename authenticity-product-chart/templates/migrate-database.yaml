@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: authenticity-product-database-migration-job
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install, pre-upgrade
+    "helm.sh/hook-weight": "-5"
+spec:
+  ttlSecondsAfterFinished: 86400
+  template:
+    spec:
+      containers:
+      - name: authenticity-product-database-migration-job
+        image: "khaldi22/authenticity_product:{{ .Values.global.image.tag}}"
+        imagePullPolicy:  {{ .Values.global.imagePullPolicy }}
+        args:
+        - "python -m alembic upgrade head"
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_HOST
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_NAME
+      restartPolicy: OnFailure
+      imagePullSecrets:
+      - name: dockersecret
