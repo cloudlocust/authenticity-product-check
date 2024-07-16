@@ -91,11 +91,9 @@ pipeline {
       }
     }
     stage("Publish") {
-                when {
-                  expression {
-                    BRANCH_NAME == ~/(production|master|develop)/
-                  }
-                }
+        when{
+             expression { BRANCH_NAME ==~ /(master|develop|production)/ }
+        }
       stages {
         stage('Publish in dockerhub') {
           environment {
