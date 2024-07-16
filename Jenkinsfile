@@ -132,7 +132,7 @@ pipeline {
             steps{
                 script{
                      withKubeConfig([credentialsId:'kubernetes_test']){
-                        sh "helm upgrade --install  authenticity-product  authenticity-product-chart/ -f helm_values/authenticity-product.yaml -n ${ENV_NAME}"
+                        sh "helm upgrade --install  authenticity-product  authenticity-product-chart/ -f helm_values/${ENV_NAME}/authenticity-product.yaml -n ${ENV_NAME}"
                      }
                 }
             }
