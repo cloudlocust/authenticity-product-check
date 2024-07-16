@@ -1,0 +1,22 @@
+# Default values for authenticity-product-chart.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+global:
+  imagePullPolicy: Always
+  image:
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "staging"
+
+ingress:
+    path: /
+    host: staging.authenticity.product.khaldi.online
+    secretName: shabakett-tls
+
+
+DB_HOST: postgresql.staging.svc
+DB_NAME: authenticity_product
+DB_USER: authenticity_product
+DB_PASSWORD: authenticity_product

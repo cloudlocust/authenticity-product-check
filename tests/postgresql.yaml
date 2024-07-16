@@ -1,0 +1,13 @@
+global:
+  postgresql:
+    auth:
+      username: "authenticity_product"
+      password: "authenticity_product"
+      database: "authenticity_product_utest"
+
+persistence:
+  enabled: false
+
+primary:
+  service:
+    type: NodePort

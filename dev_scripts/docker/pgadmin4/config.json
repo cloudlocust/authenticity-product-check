@@ -1,0 +1,14 @@
+{
+    "Servers": {
+      "1": {
+        "Name": "authenticity-product",
+        "Group": "Servers",
+        "Port": 5432,
+        "Username": "authenticity_product",
+        "SSLMode": "prefer",
+        "PassFile": "/tmp/pgpassfile",
+        "Host": "authenticity-product-db",
+        "MaintenanceDB": "postgres"
+      }
+    }
+  }

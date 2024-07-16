@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: authenticity-product
+spec:
+
+  replicas: {{ .Values.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: authenticity-product
+  template:
+    metadata:
+    # We add this annotations.rollme so that each time we upgrade the chart, the deployment restarts
+      annotations:
+        rollme: {{ randAlphaNum 5 | quote }}
+      labels:
+        app: authenticity-product
+    spec:
+      containers:
+      - name: authenticity-product
+        image: "khaldi22/authenticity_product:{{ .Values.global.image.tag}}"
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        args:
+          - "python -m uvicorn authenticity_product.services.http.entrypoint:app --host 0.0.0.0 --port 8000 "
+        ports:
+        - containerPort: 8000
+        env:
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_HOST
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_PASSWORD
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DB_NAME
+      imagePullSecrets:
+      - name: dockersecret
