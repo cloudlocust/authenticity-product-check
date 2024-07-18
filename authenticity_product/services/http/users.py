@@ -1,12 +1,14 @@
 """Module contains the user service for the FastAPI application."""
 import uuid
-from typing import Optional
+from typing import Any, Optional
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, Response
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
-from fastapi_users.authentication import AuthenticationBackend, BearerTransport, JWTStrategy
+from fastapi_users.authentication import AuthenticationBackend, BearerTransport
 from fastapi_users.db import SQLAlchemyUserDatabase
 from authenticity_product.models import get_user_db, User
+from authenticity_product.services.http.config import settings
+from authenticity_product.services.http.strategy import JWTStrategy
 
 
 SECRET = "SECRET"
@@ -44,12 +46,17 @@ bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    """Get JWT strategy."""
-    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    """Jwt strategy function."""
+    return JWTStrategy(
+        algorithm="RS256",
+        secret=settings.private_key,
+        public_key=settings.public_key,
+        lifetime_seconds=settings.token_expiration_in_seconds,
+    )
 
 
 auth_backend = AuthenticationBackend(
-    name="jwt",
+    name="application_backend",
     transport=bearer_transport,
     get_strategy=get_jwt_strategy,
 )

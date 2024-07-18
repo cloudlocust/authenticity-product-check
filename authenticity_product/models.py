@@ -5,10 +5,10 @@ from typing import AsyncGenerator
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
-from sqlalchemy.orm import Mapped, sessionmaker
+from sqlalchemy.orm import Mapped, relationship, sessionmaker
 
 
 class Base:
@@ -57,3 +57,41 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):
     """Get user database."""
     yield SQLAlchemyUserDatabase(session, User)
+
+
+class Product(DeclarativeBase):
+    """Product class representing a product in the database.
+
+    This class creates a product table with columns for id, name, and description.
+    It also defines a representation method to easily view product details.
+
+    Attributes:
+        __tablename__ (str): Table name for the product.
+        id (Column): Primary key column.
+        name (Column): Name of the product, nullable=False.
+        description (Column): Description of the product.
+        __repr__ (method): Method to display product details in string format.
+
+    """
+
+    __tablename__ = "products"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(String)
+
+    def __repr__(self) -> str:
+        """Return a string representation of the product."""
+        return f"<Product(name={self.name})>"
+
+
+# class Article(Base):
+#     __tablename__ = 'articles'
+#     id = Column(Integer, unique=True,nullable=False, autoincrement=True)
+#     title = Column(String(200), nullable=False)
+#     content = Column(String, nullable=False)
+#     product_id = Column(Integer, ForeignKey('products.id'))
+#     product = relationship("Product", back_populates="articles")
+#     def __repr__(self):
+#         return f"<Article(title={self.title})>"
+#
+# Product.articles = relationship("Article", order_by=Article.id, back_populates="product")

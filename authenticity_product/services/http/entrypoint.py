@@ -1,11 +1,19 @@
 """http entrypoint file."""
 from typing import Any
 
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 from sqlalchemy_utils import register_composites
-from authenticity_product.models import _conn, async_session_maker, Role, User
-from authenticity_product.schemas import UserCreate, UserRead, UserUpdate
+from authenticity_product.models import _conn, async_session_maker, Product, Role, User
+from authenticity_product.schemas import (
+    ProductInType,
+    ProductOutType,
+    UserCreate,
+    UserRead,
+    UserUpdate,
+)
+from authenticity_product.services.http.config import settings
 from authenticity_product.services.http.users import (
     auth_backend,
     current_active_user,
@@ -14,7 +22,6 @@ from authenticity_product.services.http.users import (
 
 
 app = FastAPI()
-
 app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"])
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),
@@ -62,4 +69,44 @@ async def startup() -> None:
     register_composites(_conn)
 
 
-# settings.init_app(app)
+# create product endpoint
+@app.post(
+    "/products/create-product",
+    response_model=ProductOutType,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_product(
+    product: ProductInType,
+    db: Session = Depends(settings.get_db),
+) -> ProductOutType:
+    """Create a new product."""
+    db_product = Product(name=product.name, description=product.description)
+    instance = db.query(Product).filter(Product.name == product.name).first()
+    if instance:
+        return instance
+    db.add(db_product)
+    db.commit()
+    db.refresh(db_product)
+    return db_product
+
+
+# update product endpoint
+@app.put(
+    "/products/{product_id}",
+    response_model=ProductOutType,
+)
+async def update_product(
+    product_id: int,
+    product: ProductInType,
+    db: Session = Depends(settings.get_db),
+) -> ProductOutType:
+    """Update a product."""
+    db_product = db.query(Product).filter(Product.id == product_id).first()
+    if db_product:
+        db_product.name = product.name
+        db_product.description = product.description
+        db.commit()
+        db.refresh(db_product)
+        return db_product
+    else:
+        raise HTTPException(status_code=404, detail="Product not found")

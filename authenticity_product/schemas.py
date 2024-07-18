@@ -2,7 +2,7 @@
 import uuid
 
 from fastapi_users import schemas
-from pydantic import EmailStr
+from pydantic import BaseModel, EmailStr
 
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
@@ -27,3 +27,28 @@ class UserUpdate(schemas.BaseUserUpdate):
     """User update schema."""
 
     pass
+
+
+class ProductOutType(BaseModel):
+    """Product schema."""
+
+    id: int
+    name: str
+    description: str
+
+    class Config:
+        """Orm config."""
+
+        orm_mode = True
+
+
+class ProductInType(BaseModel):
+    """Product schema."""
+
+    name: str
+    description: str
+
+    class Config:
+        """Orm config."""
+
+        orm_mode = True
