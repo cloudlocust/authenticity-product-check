@@ -24,13 +24,13 @@ pipeline {
         }
         stage('Mypy') {
           steps {
-            sh 'pipenv run mypy -p user_management --config-file mypy.ini --no-incremental  --namespace-packages'
+            sh 'pipenv run mypy -p authenticity_product --config-file mypy.ini --no-incremental  --namespace-packages'
           }
         }
 
         stage('Pylint') {
           steps {
-            sh 'pipenv run pylint user_management --output-format=parseable  --rcfile=.pylintrc'
+            sh 'pipenv run pylint authenticity_product --output-format=parseable  --rcfile=.pylintrc'
           }
         }
       }
