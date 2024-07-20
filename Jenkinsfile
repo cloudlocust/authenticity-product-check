@@ -32,7 +32,7 @@ pipeline {
           steps {
             sh 'pipenv run pylint user_management --output-format=parseable  --rcfile=.pylintrc'
           }
-
+        }
       }
     }
     stage('Create a namespace and start the Postgresql instances ') {
