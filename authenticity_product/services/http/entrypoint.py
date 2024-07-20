@@ -5,7 +5,7 @@ from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import register_composites
-from authenticity_product.models import _conn, async_session_maker, Product, Role, User
+from authenticity_product.models import _conn, async_session_maker, Product, Role
 from authenticity_product.schemas import (
     ProductInType,
     ProductOutType,
@@ -14,17 +14,13 @@ from authenticity_product.schemas import (
     UserUpdate,
 )
 from authenticity_product.services.http.config import settings
-from authenticity_product.services.http.users import (
-    auth_backend,
-    current_active_user,
-    fastapi_users,
-)
+from authenticity_product.services.http.users import auth_backend, fastapi_users
 
 
 app = FastAPI()
 app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"])
 app.include_router(
-    fastapi_users.get_register_router(UserRead, UserCreate),
+    fastapi_users.get_register_router(UserRead, UserCreate),  # type: ignore
     prefix="/auth",
     tags=["auth"],
 )
@@ -43,12 +39,6 @@ app.include_router(
     prefix="/users",
     tags=["users"],
 )
-
-
-@app.get("/authenticated-route")
-async def authenticated_route(user: User = Depends(current_active_user)):
-    """Authenticated route."""
-    return {"message": f"Hello {user.email}!"}
 
 
 @app.get("/health")
@@ -80,13 +70,21 @@ async def create_product(
     db: Session = Depends(settings.get_db),
 ) -> ProductOutType:
     """Create a new product."""
-    db_product = Product(name=product.name, description=product.description)
     if instance := db.query(Product).filter(Product.name == product.name).first():
-        return instance
+        if instance.description and instance.name and instance.id:
+            return ProductOutType(
+                id=instance.id, name=instance.name, description=instance.description
+            )
+        raise Exception("type mismatch for product name or description")
+    db_product = Product(name=product.name, description=product.description)
     db.add(db_product)
     db.commit()
     db.refresh(db_product)
-    return db_product
+    if db_product.description and db_product.name and db_product.id:
+        return ProductOutType(
+            id=db_product.id, name=db_product.name, description=db_product.description
+        )
+    raise Exception("type mismatch for product name or description")
 
 
 # update product endpoint
@@ -105,5 +103,9 @@ async def update_product(
         db_product.description = product.description
         db.commit()
         db.refresh(db_product)
-        return db_product
+        if db_product.description and db_product.name and db_product.id:
+            return ProductOutType(
+                id=db_product.id, name=db_product.name, description=db_product.description
+            )
+        raise Exception("type mismatch for product name or description")
     raise HTTPException(status_code=404, detail="Product not found")

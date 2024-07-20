@@ -1,10 +1,10 @@
 """Config module."""
 import json
 import os
-from http.client import HTTPException
 from typing import Any
 from urllib.request import urlopen
 
+from fastapi import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwcrypto.jwk import JWK
 from sqlalchemy import create_engine
@@ -23,7 +23,7 @@ class FastApiSettingsMixin:
     """FastApi settings mixin."""
 
     oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-    public_key_web_content = public_key_web_content
+    public_key_web_content: list[dict] = public_key_web_content if public_key_web_content else []  # type: ignore
 
     @classmethod
     def get_public_key(cls, index: int = 0) -> str:

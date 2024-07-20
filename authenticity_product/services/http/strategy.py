@@ -4,7 +4,9 @@ from uuid import UUID
 import jwt
 from fastapi_users import BaseUserManager, exceptions
 from fastapi_users.authentication import Strategy
-from fastapi_users.authentication.strategy.jwt import JWTStrategyDestroyNotSupportedError
+from fastapi_users.authentication.strategy.jwt import (  # type: ignore
+    JWTStrategyDestroyNotSupportedError,
+)
 from fastapi_users.jwt import decode_jwt, generate_jwt, SecretType
 from authenticity_product.models import User
 
@@ -16,16 +18,12 @@ class JWTStrategy(Strategy[User, UUID]):
         self,
         secret: SecretType,
         lifetime_seconds: int,
-        token_audience: list[str] = None,
+        token_audience: list[str] | None = None,
         algorithm: str = "RS256",
-        public_key: SecretType = None,
+        public_key: SecretType | None = None,
     ):
         self.secret = secret
         self.lifetime_seconds = lifetime_seconds
-        if token_audience is None:
-            self.token_audience = ["fastapi-users:auth"]  # default audience is empty list
-        else:
-            self.token_audience = token_audience
         self.token_audience = token_audience
         self.algorithm = algorithm
         self.public_key = public_key
@@ -49,7 +47,10 @@ class JWTStrategy(Strategy[User, UUID]):
 
         try:
             data = decode_jwt(
-                token, self.decode_key, self.token_audience, algorithms=[self.algorithm]
+                token,
+                self.decode_key,
+                self.token_audience if self.token_audience is not None else ["fastapi-users:auth"],
+                algorithms=[self.algorithm],
             )
             if (user_id := data.get("sub")) is None:
                 return None

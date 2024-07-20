@@ -1,5 +1,6 @@
 """Module contains the user service for the FastAPI application."""
 import uuid
+from collections.abc import AsyncGenerator
 
 from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
@@ -19,21 +20,27 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
-    async def on_after_register(self, user: User, request: Request = None):
+    async def on_after_register(self, user: User, request: Request | None = None) -> None:
         """After register."""
         print(f"User {user.id} has registered.")
 
-    async def on_after_forgot_password(self, user: User, token: str, request: Request = None):
+    async def on_after_forgot_password(
+        self, user: User, token: str, request: Request | None = None
+    ) -> None:
         """After forgot password."""
         print(f"User {user.id} has forgot their password. Reset token: {token}")
 
-    async def on_after_request_verify(self, user: User, token: str, request: Request = None):
-        """After request verify."""
+    async def on_after_request_verify(
+        self, user: User, token: str, request: Request | None = None
+    ) -> None:
+        """After request verify function, send verification email."""
         print(f"Verification requested for user {user.id}. Verification token: {token}")
 
 
-async def get_user_manager(user_db: SQLAlchemyUserDatabase = Depends(get_user_db)):
-    """Get user manager."""
+async def get_user_manager(
+    user_db: SQLAlchemyUserDatabase[User, uuid.UUID] = Depends(get_user_db),
+) -> AsyncGenerator[UserManager, None]:
+    """Async generator to get the user manager."""
     yield UserManager(user_db)
 
 
