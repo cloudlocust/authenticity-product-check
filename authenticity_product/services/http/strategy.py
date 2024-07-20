@@ -1,5 +1,4 @@
 """Custom strategy."""
-from typing import Any
 from uuid import UUID
 
 import jwt
@@ -17,12 +16,16 @@ class JWTStrategy(Strategy[User, UUID]):
         self,
         secret: SecretType,
         lifetime_seconds: int,
-        token_audience: list[str] = ["fastapi-users:auth"],
+        token_audience: list[str] = None,
         algorithm: str = "RS256",
         public_key: SecretType = None,
     ):
         self.secret = secret
         self.lifetime_seconds = lifetime_seconds
+        if token_audience is None:
+            self.token_audience = ["fastapi-users:auth"]  # default audience is empty list
+        else:
+            self.token_audience = token_audience
         self.token_audience = token_audience
         self.algorithm = algorithm
         self.public_key = public_key
@@ -38,9 +41,9 @@ class JWTStrategy(Strategy[User, UUID]):
         return self.public_key or self.secret
 
     async def read_token(
-        self, token: str, user_manager: BaseUserManager[User, UUID]
+        self, token: str | None, user_manager: BaseUserManager[User, UUID]
     ) -> User | None:
-        """Read a token from the request headers."""
+        """Read token."""
         if token is None:
             return None
 
@@ -48,8 +51,7 @@ class JWTStrategy(Strategy[User, UUID]):
             data = decode_jwt(
                 token, self.decode_key, self.token_audience, algorithms=[self.algorithm]
             )
-            user_id = data.get("sub")
-            if user_id is None:
+            if (user_id := data.get("sub")) is None:
                 return None
         except jwt.PyJWTError:
             return None

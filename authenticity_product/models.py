@@ -1,14 +1,14 @@
 """Database models for the application."""
 import os
+from collections.abc import AsyncGenerator
 from datetime import datetime
-from typing import AsyncGenerator
 
 from fastapi import Depends
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
-from sqlalchemy import Column, DateTime, Float, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
-from sqlalchemy.orm import Mapped, relationship, sessionmaker
+from sqlalchemy.orm import Mapped, sessionmaker
 
 
 class Base:
@@ -49,9 +49,9 @@ async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit
 
 
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    """Get async session."""
-    async with async_session_maker() as session:
-        yield session
+    """Async session generator."""
+    async with async_session_maker() as _session:
+        yield _session
 
 
 async def get_user_db(session: AsyncSession = Depends(get_async_session)):

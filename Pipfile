@@ -4,18 +4,17 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-alembic = "==1.8.1"
-sqlalchemy = "==1.4.44"
-sqlalchemy-utils = "==0.38.3"
-psycopg2-binary = "==2.9.5"
-fastapi-users-db-sqlalchemy= "<5.0.0"
-fastapi = { version = "==0.88.0", extras = ["all"] }
-fastapi-users = { version = "==10.2.1", extras = ["sqlalchemy"] }
+alembic = "==1.13.2"
+sqlalchemy = "==2.0.31"
+sqlalchemy-utils = "==0.41.2"
+psycopg2-binary = "==2.9.9"
+fastapi = { version = "==0.111.1", extras = ["all"] }
+fastapi-users = { version = "==13.0.0", extras = ["sqlalchemy"] }
 #cryptography = "==38.0.4"
 #jwcrypto = "==1.4.2"
 #pydantic = "==1.10.2"
 #requests = "*"
-asyncpg = "==0.27.0"
+asyncpg = "==0.29.0"
 
 [dev-packages]
 pytest-eventlet =       "==1.0.0"

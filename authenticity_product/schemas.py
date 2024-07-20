@@ -8,7 +8,7 @@ from pydantic import BaseModel, EmailStr
 class UserRead(schemas.BaseUser[uuid.UUID]):
     """User read schema."""
 
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 class UserCreate(schemas.CreateUpdateDictModel):
@@ -26,7 +26,7 @@ class UserCreate(schemas.CreateUpdateDictModel):
 class UserUpdate(schemas.BaseUserUpdate):
     """User update schema."""
 
-    pass
+    pass  # pylint: disable=unnecessary-pass
 
 
 class ProductOutType(BaseModel):

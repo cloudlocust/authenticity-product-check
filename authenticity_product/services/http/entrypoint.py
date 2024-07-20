@@ -61,7 +61,7 @@ def read_root() -> Any:
 async def startup() -> None:
     """Connect to database at app startup required for fastapi_users, and create roles."""
     async with async_session_maker() as session:
-        for role_name in ["admin", "user"]:
+        for role_name in ("admin", "user"):
             statement = select(Role).where(Role.name == role_name.lower())
             if not ((await session.execute(statement)).first()):
                 session.add(Role(name=role_name.lower()))
@@ -81,8 +81,7 @@ async def create_product(
 ) -> ProductOutType:
     """Create a new product."""
     db_product = Product(name=product.name, description=product.description)
-    instance = db.query(Product).filter(Product.name == product.name).first()
-    if instance:
+    if instance := db.query(Product).filter(Product.name == product.name).first():
         return instance
     db.add(db_product)
     db.commit()
@@ -101,12 +100,10 @@ async def update_product(
     db: Session = Depends(settings.get_db),
 ) -> ProductOutType:
     """Update a product."""
-    db_product = db.query(Product).filter(Product.id == product_id).first()
-    if db_product:
+    if db_product := db.query(Product).filter(Product.id == product_id).first():
         db_product.name = product.name
         db_product.description = product.description
         db.commit()
         db.refresh(db_product)
         return db_product
-    else:
-        raise HTTPException(status_code=404, detail="Product not found")
+    raise HTTPException(status_code=404, detail="Product not found")

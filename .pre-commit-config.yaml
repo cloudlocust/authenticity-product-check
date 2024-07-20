@@ -31,3 +31,13 @@ repos:
                 entry: pydocstyle
                 language: system
                 files: \.py$
+
+    -   repo: local
+        hooks:
+            -   id: pylint
+                name: pylint
+                entry: pylint
+                language: system
+                files: \.py$
+                exclude: (.*versions.*|.*_examples\.py$|setup.py|tests/*)
+                args: ["--rcfile=.pylintrc"]

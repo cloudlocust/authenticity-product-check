@@ -5,12 +5,10 @@ from http.client import HTTPException
 from typing import Any
 from urllib.request import urlopen
 
-from fastapi import FastAPI
 from fastapi.security import OAuth2PasswordBearer
 from jwcrypto.jwk import JWK
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy_utils import register_composites
 from authenticity_product.services.http import private_key, rsa_key
 
 
