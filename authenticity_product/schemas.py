@@ -19,7 +19,7 @@ class UserCreate(schemas.CreateUpdateDictModel):
     first_name: str
     last_name: str
     phone: str
-    civility: str
+    civility: str | None = None
     role: str
 
 

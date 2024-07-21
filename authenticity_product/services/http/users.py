@@ -51,6 +51,7 @@ bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 def get_jwt_strategy() -> JWTStrategy:
     """Jwt strategy function."""
     return JWTStrategy(
+        token_audience=["fastapi-users:auth"],
         algorithm="RS256",
         secret=settings.private_key,
         public_key=settings.public_key,

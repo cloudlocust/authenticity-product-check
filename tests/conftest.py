@@ -1,5 +1,6 @@
 import asyncio
 import os
+import uuid
 from typing import AsyncGenerator
 
 import httpx
@@ -7,8 +8,11 @@ import pytest
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 from sqlalchemy.orm import sessionmaker
-from authenticity_product.models import DeclarativeBase
+from authenticity_product.models import DeclarativeBase, User
+from authenticity_product.schemas import UserCreate
+from authenticity_product.services.http.db_async import async_session_maker
 from authenticity_product.services.http.entrypoint import app
+from authenticity_product.services.http.users import UserManager
 
 
 @pytest.fixture(scope="session")
@@ -77,3 +81,34 @@ def get_test_client(db_dependency):
 async def test_app_client(get_test_client) -> AsyncGenerator[httpx.AsyncClient, None]:
     async for client in get_test_client(app):
         yield client
+
+
+from fastapi_users_db_sqlalchemy import SQLAlchemyUserDatabase
+
+
+@pytest.fixture(scope="module")
+@pytest.mark.asyncio
+async def user_manager():
+    async with async_session_maker() as session:
+        yield UserManager(SQLAlchemyUserDatabase[User, uuid.UUID](session, User))
+
+
+@pytest.fixture(scope="module")
+@pytest.mark.asyncio
+async def fake_user(db_dependency, user_manager, test_app_client):
+    user = await user_manager.create(
+        UserCreate(
+            **{
+                "email": "king.arthur@camelot.bt",
+                "first_name": "lake",
+                "last_name": "lady",
+                "civility": "Mrs",
+                "phone": "0101010101",
+                "password": "guinevere",
+                "role": "admin",
+            }
+        )
+    )
+    yield user
+    db_dependency.query(User).filter(User.email == "king.arthur@camelot.bt").delete()
+    db_dependency.commit()

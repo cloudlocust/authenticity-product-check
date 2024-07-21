@@ -65,7 +65,7 @@ class JWTStrategy(Strategy[User, UUID]):
 
     async def write_token(self, user: User) -> str:
         """Write a token to the response."""
-        data = {"sub": str(user.id), "aud": self.token_audience, "role": user.role}
+        data = {"id": str(user.id), "aud": self.token_audience, "role": user.role}
         return generate_jwt(data, self.encode_key, self.lifetime_seconds, algorithm=self.algorithm)
 
     async def destroy_token(self, token: str, user: User) -> None:
