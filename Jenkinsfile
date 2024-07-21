@@ -5,12 +5,6 @@ pipeline {
   environment {
     // GEnerate random number between 0 and 1000
     ID = "${Math.abs(new Random().nextInt(1000+1))}"
-    // Do not change this env var name, it's used in tests env vars
-    //    DB_HOST = "postgresql"
-    //    RABBITMQ_HOST = "rabbitmq"
-    //    BACKBONE_RABBITMQ_HOST = "backbone-rabbitmq"
-    //            DISCORD_WEBHOOK_URL = credentials('discord-webhook')
-    //            GITHUB_CREDENTIALS = credentials('github myem developer')
   }
 
   stages {
@@ -28,7 +22,17 @@ pipeline {
             sh 'pipenv run pydocstyle --config=.pydocstyle.ini ${MODULE_DIR_NAME}'
           }
         }
+        stage('Mypy') {
+          steps {
+            sh 'pipenv run mypy -p authenticity_product --config-file mypy.ini --no-incremental  --namespace-packages'
+          }
+        }
 
+        stage('Pylint') {
+          steps {
+            sh 'pipenv run pylint authenticity_product --output-format=parseable  --rcfile=.pylintrc'
+          }
+        }
       }
     }
     stage('Create a namespace and start the Postgresql instances ') {

@@ -1,14 +1,10 @@
 """Database models for the application."""
-import os
 from datetime import datetime
-from typing import AsyncGenerator
 
-from fastapi import Depends
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
+from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.ext.declarative import declarative_base, DeclarativeMeta
-from sqlalchemy.orm import Mapped, sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Mapped
 
 
 class Base:
@@ -18,7 +14,7 @@ class Base:
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
 
 
-DeclarativeBase: DeclarativeMeta = declarative_base(cls=Base)
+DeclarativeBase = declarative_base(cls=Base)
 
 
 class Role(DeclarativeBase):
@@ -40,20 +36,26 @@ class User(DeclarativeBase, SQLAlchemyBaseUserTableUUID):
     role: Mapped[str] = Column(String, ForeignKey("role.name"), nullable=False)
 
 
-DATABASE_URL = f"postgresql+asyncpg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
+class Product(DeclarativeBase):
+    """Product class representing a product in the database.
 
+    This class creates a product table with columns for id, name, and description.
+    It also defines a representation method to easily view product details.
 
-engine = create_async_engine(DATABASE_URL)
-_conn = engine.connect()
-async_session_maker = sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+    Attributes:
+        __tablename__ (str): Table name for the product.
+        id (Column): Primary key column.
+        name (Column): Name of the product, nullable=False.
+        description (Column): Description of the product.
+        __repr__ (method): Method to display product details in string format.
 
+    """
 
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    """Get async session."""
-    async with async_session_maker() as session:
-        yield session
+    __tablename__ = "products"
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
+    description = Column(String)
 
-
-async def get_user_db(session: AsyncSession = Depends(get_async_session)):
-    """Get user database."""
-    yield SQLAlchemyUserDatabase(session, User)
+    def __repr__(self) -> str:
+        """Return a string representation of the product."""
+        return f"<Product(name={self.name})>"
