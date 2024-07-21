@@ -59,16 +59,3 @@ class Product(DeclarativeBase):
     def __repr__(self) -> str:
         """Return a string representation of the product."""
         return f"<Product(name={self.name})>"
-
-
-# class Article(Base):
-#     __tablename__ = 'articles'
-#     id = Column(Integer, unique=True,nullable=False, autoincrement=True)
-#     title = Column(String(200), nullable=False)
-#     content = Column(String, nullable=False)
-#     product_id = Column(Integer, ForeignKey('products.id'))
-#     product = relationship("Product", back_populates="articles")
-#     def __repr__(self):
-#         return f"<Article(title={self.title})>"
-#
-# Product.articles = relationship("Article", order_by=Article.id, back_populates="product")
