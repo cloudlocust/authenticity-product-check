@@ -1,50 +1,38 @@
 """http entrypoint file."""
-from typing import Any
-
 from fastapi import Depends, FastAPI, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import register_composites
-from authenticity_product.models import _conn, async_session_maker, Product, Role
-from authenticity_product.schemas import (
-    ProductInType,
-    ProductOutType,
-    UserCreate,
-    UserRead,
-    UserUpdate,
-)
+from authenticity_product.models import Product, Role
+from authenticity_product.schemas import ProductInType, ProductOutType, UserCreate, UserRead
 from authenticity_product.services.http.config import settings
+from authenticity_product.services.http.db_async import _conn_async, async_session_maker
 from authenticity_product.services.http.users import auth_backend, fastapi_users
 
 
 app = FastAPI()
 app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"])
+
 app.include_router(
     fastapi_users.get_register_router(UserRead, UserCreate),  # type: ignore
     prefix="/auth",
     tags=["auth"],
 )
-app.include_router(
-    fastapi_users.get_reset_password_router(),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_verify_router(UserRead),
-    prefix="/auth",
-    tags=["auth"],
-)
-app.include_router(
-    fastapi_users.get_users_router(UserRead, UserUpdate),
-    prefix="/users",
-    tags=["users"],
-)
-
-
-@app.get("/health")
-def read_root() -> Any:
-    """Read root."""
-    return {"Hello": "World"}
+# app.include_router(
+#     fastapi_users.get_reset_password_router(),
+#     prefix="/auth",
+#     tags=["auth"],
+# )
+# app.include_router(
+#     fastapi_users.get_verify_router(UserRead),
+#     prefix="/auth",
+#     tags=["auth"],
+# )
+# app.include_router(
+#     fastapi_users.get_users_router(UserRead, UserUpdate),
+#     prefix="/users",
+#     tags=["users"],
+# )
 
 
 @app.on_event("startup")
@@ -56,7 +44,7 @@ async def startup() -> None:
             if not ((await session.execute(statement)).first()):
                 session.add(Role(name=role_name.lower()))
                 await session.commit()
-    register_composites(_conn)
+    register_composites(_conn_async)
 
 
 # create product endpoint

@@ -6,8 +6,9 @@ from fastapi import Depends, Request
 from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport
 from fastapi_users.db import SQLAlchemyUserDatabase
-from authenticity_product.models import get_user_db, User
+from authenticity_product.models import User
 from authenticity_product.services.http.config import settings
+from authenticity_product.services.http.db_async import get_user_db_async
 from authenticity_product.services.http.strategy import JWTStrategy
 
 
@@ -38,7 +39,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
 
 
 async def get_user_manager(
-    user_db: SQLAlchemyUserDatabase[User, uuid.UUID] = Depends(get_user_db),
+    user_db: SQLAlchemyUserDatabase[User, uuid.UUID] = Depends(get_user_db_async),
 ) -> AsyncGenerator[UserManager, None]:
     """Async generator to get the user manager."""
     yield UserManager(user_db)

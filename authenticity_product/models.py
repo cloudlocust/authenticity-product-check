@@ -1,15 +1,10 @@
 """Database models for the application."""
-import os
-import uuid
-from collections.abc import AsyncGenerator
 from datetime import datetime
 
-from fastapi import Depends
-from fastapi_users.db import SQLAlchemyBaseUserTableUUID, SQLAlchemyUserDatabase
+from fastapi_users.db import SQLAlchemyBaseUserTableUUID
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, sessionmaker
+from sqlalchemy.orm import Mapped
 
 
 class Base:
@@ -39,31 +34,6 @@ class User(DeclarativeBase, SQLAlchemyBaseUserTableUUID):
     phone = Column(String(), nullable=False)
     civility = Column(String(), nullable=True)
     role: Mapped[str] = Column(String, ForeignKey("role.name"), nullable=False)
-
-
-DATABASE_URL = f"postgresql+asyncpg://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}/{os.getenv('DB_NAME')}"
-
-
-engine = create_async_engine(DATABASE_URL)
-_conn = engine.connect()
-async_session_maker = async_session = sessionmaker(  # type: ignore
-    bind=engine,
-    class_=AsyncSession,
-    expire_on_commit=False,
-)
-
-
-async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
-    """Async session generator."""
-    async with async_session_maker() as _session:
-        yield _session
-
-
-async def get_user_db(
-    session: AsyncSession = Depends(get_async_session),
-) -> AsyncGenerator[SQLAlchemyUserDatabase[User, uuid.UUID], None]:
-    """Async generator to get the user database."""
-    yield SQLAlchemyUserDatabase[User, uuid.UUID](session, User)
 
 
 class Product(DeclarativeBase):
