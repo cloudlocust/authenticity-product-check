@@ -7,6 +7,7 @@ import httpx
 import pytest
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
+from fastapi.testclient import TestClient
 from sqlalchemy.orm import sessionmaker
 from authenticity_product.models import DeclarativeBase, User
 from authenticity_product.schemas import UserCreate
@@ -112,3 +113,10 @@ async def fake_user(db_dependency, user_manager, test_app_client):
     yield user
     db_dependency.query(User).filter(User.email == "king.arthur@camelot.bt").delete()
     db_dependency.commit()
+
+
+@pytest.fixture(scope="module")
+def client():
+    from authenticity_product.services.http.entrypoint import app
+
+    yield TestClient(app)

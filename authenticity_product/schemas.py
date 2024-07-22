@@ -42,6 +42,17 @@ class ProductOutType(BaseModel):
         orm_mode = True
 
 
+class ListProductsOutType(BaseModel):
+    """List of products schema."""
+
+    products: list[ProductOutType]
+
+    class Config:
+        """Orm config."""
+
+        orm_mode = True
+
+
 class ProductInType(BaseModel):
     """Product schema."""
 
