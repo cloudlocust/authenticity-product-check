@@ -88,9 +88,10 @@ def delete_product(
     if db_product := db.query(Product).filter(Product.id == product_id).first():
         db.delete(db_product)
         db.commit()
-        return ProductOutType(
-            id=product_id, name=db_product.name, description=db_product.description
-        )
+        if db_product.description and db_product.name and db_product.id:
+            return ProductOutType(
+                id=product_id, name=db_product.name, description=db_product.description
+            )
     raise HTTPException(status_code=404, detail="Product not found")
 
 
@@ -106,6 +107,7 @@ def get_products(
         products=[
             ProductOutType(id=product.id, name=product.name, description=product.description)
             for product in db.query(Product).all()
+            if product.name and product.description and product.id
         ]
     )
 
@@ -117,9 +119,10 @@ def get_product(
 ) -> ProductOutType:
     """Get a single product."""
     if db_product := db.query(Product).filter(Product.id == product_id).first():
-        return ProductOutType(
-            id=db_product.id, name=db_product.name, description=db_product.description
-        )
+        if db_product.description and db_product.name and db_product.id:
+            return ProductOutType(
+                id=db_product.id, name=db_product.name, description=db_product.description
+            )
     raise HTTPException(status_code=404, detail="Product not found")
 
 
