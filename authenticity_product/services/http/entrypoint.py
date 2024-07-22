@@ -41,7 +41,7 @@ def create_product(
             return ProductOutType(
                 id=instance.id, name=instance.name, description=instance.description
             )
-        raise Exception("type mismatch for product name or description")
+        raise HTTPException(status_code=404)
     db_product = Product(name=product.name, description=product.description)
     db.add(db_product)
     db.commit()
@@ -50,7 +50,7 @@ def create_product(
         return ProductOutType(
             id=db_product.id, name=db_product.name, description=db_product.description
         )
-    raise Exception("type mismatch for product name or description")
+    raise HTTPException(status_code=404)
 
 
 @app.put(
@@ -72,8 +72,8 @@ def update_product(
             return ProductOutType(
                 id=db_product.id, name=db_product.name, description=db_product.description
             )
-        raise Exception("type mismatch for product name or description")
-    raise HTTPException(status_code=404, detail="Product not found")
+        raise HTTPException(status_code=404)
+    raise HTTPException(status_code=404, detail=f"Product not found whith id {product_id}")
 
 
 @app.delete(
@@ -92,7 +92,7 @@ def delete_product(
             return ProductOutType(
                 id=product_id, name=db_product.name, description=db_product.description
             )
-    raise HTTPException(status_code=404, detail="Product not found")
+    raise HTTPException(status_code=404, detail=f"Product not found whith id {product_id}")
 
 
 @app.get(
@@ -123,7 +123,7 @@ def get_product(
             return ProductOutType(
                 id=db_product.id, name=db_product.name, description=db_product.description
             )
-    raise HTTPException(status_code=404, detail="Product not found")
+    raise HTTPException(status_code=404, detail=f"Product not found whith id {product_id}")
 
 
 @app.on_event("startup")
