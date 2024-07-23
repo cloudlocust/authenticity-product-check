@@ -1,5 +1,6 @@
 """http entrypoint file."""
 from fastapi import Depends, FastAPI, HTTPException, status
+from sqladmin import Admin, ModelView
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import register_composites
@@ -136,3 +137,15 @@ async def startup() -> None:
                 session.add(Role(name=role_name.lower()))
                 await session.commit()
     register_composites(_conn_async)
+
+
+admin = Admin(app, settings.engine)
+
+
+class ProductAdmin(ModelView, model=Product):  # type: ignore
+    """Product admin view."""
+
+    column_list = [Product.id, Product.name, Product.description]
+
+
+admin.add_view(ProductAdmin)
