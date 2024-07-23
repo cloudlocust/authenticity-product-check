@@ -1,6 +1,6 @@
 """http entrypoint file."""
 from fastapi import Depends, FastAPI, HTTPException, status
-from sqladmin import Admin, ModelView
+from sqladmin import Admin
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import register_composites
@@ -12,6 +12,7 @@ from authenticity_product.schemas import (
     UserCreate,
     UserRead,
 )
+from authenticity_product.services.http.admin import ProductAdmin, UserAdmin
 from authenticity_product.services.http.config import settings
 from authenticity_product.services.http.db_async import _conn_async, async_session_maker
 from authenticity_product.services.http.users import auth_backend, fastapi_users
@@ -140,12 +141,5 @@ async def startup() -> None:
 
 
 admin = Admin(app, settings.engine)
-
-
-class ProductAdmin(ModelView, model=Product):  # type: ignore
-    """Product admin view."""
-
-    column_list = [Product.id, Product.name, Product.description]
-
-
 admin.add_view(ProductAdmin)
+admin.add_view(UserAdmin)
