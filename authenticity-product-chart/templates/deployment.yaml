@@ -45,5 +45,20 @@ spec:
             configMapKeyRef:
               name: authenticity-product
               key: DB_NAME
+        - name: PUBLIC_KEY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: PUBLIC_KEY_URL
+        - name: FASTAPI_USERS_RSA_KEY_URL
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: FASTAPI_USERS_RSA_KEY_URL
+        - name: TOKEN_EXPIRATION_IN_SECONDS
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: TOKEN_EXPIRATION_IN_SECONDS
       imagePullSecrets:
       - name: dockersecret
