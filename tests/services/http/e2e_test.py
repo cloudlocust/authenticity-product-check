@@ -77,7 +77,7 @@ class TestProduct:
         json = {"name": "Updated Test Product", "description": "This is an updated test product"}
         response = client.put(f"/products/5", json=json)
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()["detail"] == "Product not found"
+        assert response.json()["detail"] == "Product not found whith id 5"
 
     def test_delete_product(self, client, db_dependency, request):
         def clean():
@@ -142,7 +142,7 @@ class TestProduct:
     def test_get_product_not_found(self, client, db_dependency, request):
         response = client.get(f"/products/5")
         assert response.status_code == status.HTTP_404_NOT_FOUND
-        assert response.json()["detail"] == "Product not found"
+        assert response.json()["detail"] == "Product not found whith id 5"
 
 
 @pytest.mark.router
