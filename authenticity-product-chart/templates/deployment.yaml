@@ -60,5 +60,10 @@ spec:
             configMapKeyRef:
               name: authenticity-product
               key: TOKEN_EXPIRATION_IN_SECONDS
+        - name: DNS_DOMAIN
+          valueFrom:
+            configMapKeyRef:
+              name: authenticity-product
+              key: DNS_DOMAIN
       imagePullSecrets:
       - name: dockersecret

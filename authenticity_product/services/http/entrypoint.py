@@ -12,7 +12,7 @@ from authenticity_product.schemas import (
     UserCreate,
     UserRead,
 )
-from authenticity_product.services.http.admin import ProductAdmin, UserAdmin
+from authenticity_product.services.http.admin import ProductAdmin, UserAdmin, AdminAuth
 from authenticity_product.services.http.config import settings
 from authenticity_product.services.http.db_async import _conn_async, async_session_maker
 from authenticity_product.services.http.users import auth_backend, fastapi_users
@@ -143,3 +143,5 @@ async def startup() -> None:
 admin = Admin(app, settings.engine)
 admin.add_view(ProductAdmin)
 admin.add_view(UserAdmin)
+authentication_backend = AdminAuth(secret_key="secret_key")
+admin = Admin(app, settings.engine,authentication_backend=authentication_backend)
