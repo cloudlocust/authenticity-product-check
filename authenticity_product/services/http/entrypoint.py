@@ -7,7 +7,6 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy_utils import register_composites
 from starlette.responses import FileResponse
-
 from authenticity_product.models import Product, Role
 from authenticity_product.schemas import (
     ListProductsOutType,
@@ -16,7 +15,12 @@ from authenticity_product.schemas import (
     UserCreate,
     UserRead,
 )
-from authenticity_product.services.http.admin import ProductAdmin, UserAdmin, ArticleAdmin, AdminAuth
+from authenticity_product.services.http.admin import (
+    AdminAuth,
+    ArticleAdmin,
+    ProductAdmin,
+    UserAdmin,
+)
 from authenticity_product.services.http.config import settings
 from authenticity_product.services.http.db_async import _conn_async, async_session_maker
 from authenticity_product.services.http.users import auth_backend, fastapi_users
@@ -137,9 +141,10 @@ def get_pdf():
     file_path = "/home/khaldi/Downloads/sssssss.pdf"
 
     if os.path.exists(file_path):
-        return FileResponse(path=file_path, filename="your_file.pdf", media_type='application/pdf')
+        return FileResponse(path=file_path, filename="your_file.pdf", media_type="application/pdf")
     else:
         raise HTTPException(status_code=404, detail="File not found")
+
 
 @app.on_event("startup")
 async def startup() -> None:
@@ -152,9 +157,10 @@ async def startup() -> None:
                 await session.commit()
     register_composites(_conn_async)
 
+
 authentication_backend = AdminAuth(secret_key="...")
 
-admin = Admin(app, settings.engine,authentication_backend=authentication_backend)
+admin = Admin(app, settings.engine, authentication_backend=authentication_backend)
 admin.add_view(ProductAdmin)
 admin.add_view(UserAdmin)
 admin.add_view(ArticleAdmin)

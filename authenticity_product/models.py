@@ -66,11 +66,12 @@ class Product(DeclarativeBase):
         """Return a string representation of the product."""
         return f"{self.name}"
 
+
 TAG_CHOICES = [
-    ('STOCK', 'STOCK'),
-    ('DELIVERED', 'DELIVERED'),
-    ('BLOCKED', 'BLOCKED'),
-    ('SOLD', 'SOLD'),
+    ("STOCK", "STOCK"),
+    ("DELIVERED", "DELIVERED"),
+    ("BLOCKED", "BLOCKED"),
+    ("SOLD", "SOLD"),
 ]
 
 
@@ -84,5 +85,5 @@ class Article(DeclarativeBase):
     owner_manufacturer = relationship(
         "User", backref="articles", foreign_keys=[owner_manufacturer_id]
     )
-    product_id = Column(Integer, ForeignKey("products.id",ondelete="CASCADE"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
     product = relationship("Product", backref="articles")
