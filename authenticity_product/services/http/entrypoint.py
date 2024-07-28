@@ -140,6 +140,7 @@ async def startup() -> None:
     register_composites(_conn_async)
 
 
+settings.init_app(app)
 admin = Admin(app, settings.engine)
 admin.add_view(ProductAdmin)
 admin.add_view(UserAdmin)
