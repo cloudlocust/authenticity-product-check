@@ -28,6 +28,7 @@ cryptography = "*"
 jwcrypto = "*"
 requests = "*"
 asyncpg = "==0.29.0"
+fastapi_pagination = "==0.12.26"
 [pipenv]
 allow_prereleases = true
 

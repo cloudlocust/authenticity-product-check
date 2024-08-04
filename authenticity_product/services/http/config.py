@@ -8,6 +8,7 @@ from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.security import OAuth2PasswordBearer
+from fastapi_pagination import add_pagination
 from jwcrypto.jwk import JWK
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -67,6 +68,7 @@ class FastApiSettingsMixin:
         """Init fast api app."""
         cls.add_middleware(app)
         cls.add_validation_exception_handler(app)
+        add_pagination(app)
 
     @classmethod
     def get_public_key(cls, index: int = 0) -> str:

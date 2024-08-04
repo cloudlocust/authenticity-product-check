@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "f34b8aaeeffafb314a3ce14b870d168fb6b89cf9fb75066dfd3594a01fe8db9e"
+            "sha256": "b99461f20b265a9be068a73be193443437daa82918d25b6207ce7a899b022eaa"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -413,6 +413,14 @@
             ],
             "markers": "python_version >= '3.8'",
             "version": "==0.0.4"
+        },
+        "fastapi-pagination": {
+            "hashes": [
+                "sha256:40b18c312ed5c3a631106c2f19bb4b8d71b1773c1d83f6ae7555071b13822845",
+                "sha256:b59711d162e04b9b67efbdbba388c29bad0aac69da93fefaf0a85e2bb090853d"
+            ],
+            "index": "pypi",
+            "version": "==0.12.26"
         },
         "fastapi-users": {
             "extras": [
@@ -955,10 +963,10 @@
         },
         "pydantic-settings": {
             "hashes": [
-                "sha256:11ad8bacb68a045f00e4f862c7a718c8a9ec766aa8fd4c32e39a0594b207b53a",
-                "sha256:c5802e3d62b78e82522319bbc9b8f8ffb28ad1c988a99311d04f2a6051fca0a7"
+                "sha256:bb6849dc067f1687574c12a639e231f3a6feeed0a12d710c1382045c5db1c315",
+                "sha256:ed81c3a0f46392b4d7c0a565c05884e6e54b3456e6f0fe4d8814981172dc9a88"
             ],
-            "version": "==2.3.4"
+            "version": "==2.4.0"
         },
         "pygments": {
             "hashes": [
