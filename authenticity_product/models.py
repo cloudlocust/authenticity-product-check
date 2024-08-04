@@ -1,10 +1,12 @@
 """Database models for the application."""
 from datetime import datetime
+from uuid import uuid4
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
+from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UUID
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy_utils import ChoiceType
 
 
 class Base:
@@ -35,6 +37,10 @@ class User(DeclarativeBase, SQLAlchemyBaseUserTableUUID):
     civility = Column(String(), nullable=True)
     role: Mapped[str] = Column(String, ForeignKey("role.name"), nullable=False)
 
+    def __repr__(self) -> str:
+        """Return a string representation of the product."""
+        return f"{self.email})"
+
 
 class Product(DeclarativeBase):
     """Product class representing a product in the database.
@@ -58,4 +64,26 @@ class Product(DeclarativeBase):
 
     def __repr__(self) -> str:
         """Return a string representation of the product."""
-        return f"<Product(name={self.name})>"
+        return f"{self.name}"
+
+
+TAG_CHOICES = [
+    ("STOCK", "STOCK"),
+    ("DELIVERED", "DELIVERED"),
+    ("BLOCKED", "BLOCKED"),
+    ("SOLD", "SOLD"),
+]
+
+
+class Article(DeclarativeBase):
+    """Article model."""
+
+    __tablename__ = "articles"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    tag = Column(ChoiceType(TAG_CHOICES), nullable=False)
+    owner_manufacturer_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"))
+    owner_manufacturer = relationship(
+        "User", backref="articles", foreign_keys=[owner_manufacturer_id]
+    )
+    product_id = Column(Integer, ForeignKey("products.id", ondelete="CASCADE"), nullable=False)
+    product = relationship("Product", backref="articles")
