@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from authenticity_product.models import Article, User
-from authenticity_product.schemas import ArticleCreate, ArticleRead, ListArticlesOutType
+from authenticity_product.schemas import ArticleCreate, ArticleRead, ListArticlesOutType, GenerateListArticleQuery
 from authenticity_product.services.http.config import settings
 
 
@@ -90,3 +90,31 @@ def delete_article(unite_id: str, db: Session = Depends(settings.get_db)):
         product_id=db_article.product_id.__str__(),
         owner_manufacturer_id=db_article.owner_manufacturer_id.__str__(),
     )
+
+@articles_router.post("/generate_articles", response_model=ListArticlesOutType)
+def generate_articles_by_product( query:GenerateListArticleQuery, db: Session = Depends(settings.get_db)):
+    """Generate a list of articles by product."""
+    dict_query = query.dict()
+    if a := db.query(User).filter(User.email == dict_query["created_by_email"]).first():
+        dict_query["owner_manufacturer_id"] = a.id.__str__()
+    else:
+        raise HTTPException(status_code=404, detail="User not found")
+    dict_query.pop("created_by_email")
+    list_articles = [ Article(
+        product_id=dict_query["product_id"],
+        owner_manufacturer_id=dict_query["owner_manufacturer_id"],
+        tag=dict_query["status"],
+
+    ) for i in range(query.nbr_unites)]
+    db.add_all(list_articles)
+    db.commit()
+    list_articles = [
+        ArticleRead(
+            id=article.id.__str__(),
+            tag=article.tag.__str__(),
+            product_id=article.product_id.__str__(),
+            owner_manufacturer_id=article.owner_manufacturer_id.__str__(),
+        )
+        for article in list_articles
+    ]
+    return ListArticlesOutType(articles=list_articles)

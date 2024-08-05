@@ -85,7 +85,7 @@ class Article(DeclarativeBase):
         primary_key=True,
         default=uuid4,
     )
-    tag = Column(ChoiceType(TAG_CHOICES), nullable=False)
+    tag = Column(ChoiceType(TAG_CHOICES), default= "STOCK", nullable=False)
     owner_manufacturer_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"))
     owner_manufacturer = relationship(
         "User", backref="articles", foreign_keys=[owner_manufacturer_id]

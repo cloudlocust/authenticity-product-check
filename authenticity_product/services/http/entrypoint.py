@@ -33,7 +33,10 @@ from authenticity_product.services.http.entrypoint_unites import articles_router
 from authenticity_product.services.http.users import auth_backend, fastapi_users
 
 
-app = FastAPI()
+app = FastAPI(
+    title="Product Authenticity",
+
+)
 app.include_router(fastapi_users.get_auth_router(auth_backend), prefix="/auth/jwt", tags=["auth"])
 
 app.include_router(
@@ -219,7 +222,6 @@ def generate_pdf(
 
     c.setFont("Helvetica", 20)
     c.drawString(height_pts, height_pts * 3 / 8, "17 DA")
-
     c.save()
 
     # Clean up the temporary file
