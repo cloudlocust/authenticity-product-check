@@ -5,6 +5,10 @@ from fastapi_users import schemas
 from pydantic import BaseModel, EmailStr
 
 
+class UserUpdate(schemas.BaseUserUpdate):
+    pass
+
+
 class UserRead(schemas.BaseUser[uuid.UUID]):
     """User read schema."""
 
@@ -67,6 +71,7 @@ class ProductInType(BaseModel):
 
 class ArticleCreate(BaseModel):
     """Article schema."""
+
     tag: str
     owner_manufacturer_email: str
     product_id: int
@@ -74,6 +79,7 @@ class ArticleCreate(BaseModel):
 
 class ArticleRead(BaseModel):
     """Article read schema."""
+
     id: str
     tag: str
     owner_manufacturer_id: str | None
