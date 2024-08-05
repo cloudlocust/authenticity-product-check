@@ -217,10 +217,10 @@ def generate_pdf(
         img_path, 0, 0, width=height_pts, height=height_pts
     )  # Adjust position and size as needed
 
-    c.setFont("Helvetica", 8)
+    c.setFont("Helvetica", 6)
     c.drawString(height_pts, height_pts / 8, article.product.name.upper())
 
-    c.setFont("Helvetica", 18)
+    c.setFont("Helvetica", 10)
     c.drawString(height_pts, height_pts * 3 / 8, "COMPANY")
     c.save()
 
