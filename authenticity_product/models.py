@@ -3,10 +3,11 @@ from datetime import datetime
 from uuid import uuid4
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, UUID
+from sqlalchemy import Column, create_engine, DateTime, ForeignKey, func, Integer, String, UUID
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped, relationship, sessionmaker
 from sqlalchemy_utils import ChoiceType
+from authenticity_product.services.http.config import DbSettingsMixin
 
 
 class Base:
@@ -75,11 +76,25 @@ TAG_CHOICES = [
 ]
 
 
+engine = create_engine(DbSettingsMixin.db_uri)
+Session = sessionmaker(bind=engine)
+
+# Create all tables
+DeclarativeBase.metadata.create_all(engine)
+
+# Create a session
+session = Session()
+
+
 class Article(DeclarativeBase):
     """Article model."""
 
     __tablename__ = "articles"
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid4)
+    id = Column(
+        UUID(as_uuid=True),
+        primary_key=True,
+        default=session.execute(func.uuid_generate_v4()).scalar(),
+    )
     tag = Column(ChoiceType(TAG_CHOICES), nullable=False)
     owner_manufacturer_id = Column(UUID(as_uuid=True), ForeignKey("user.id", ondelete="CASCADE"))
     owner_manufacturer = relationship(
