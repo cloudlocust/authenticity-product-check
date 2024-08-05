@@ -72,8 +72,8 @@ class ProductInType(BaseModel):
 class ArticleCreate(BaseModel):
     """Article schema."""
 
-    tag: str
-    owner_manufacturer_email: str
+    status: str
+    created_by_email: str
     product_id: int
 
 
@@ -81,8 +81,8 @@ class ArticleRead(BaseModel):
     """Article read schema."""
 
     id: str
-    tag: str
-    owner_manufacturer_id: str | None
+    status: str
+    created_by_id: str | None
     product_id: int
 
     class Config:

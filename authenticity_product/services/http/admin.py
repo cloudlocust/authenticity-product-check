@@ -44,7 +44,7 @@ class UserAdmin(ModelView, model=User):  # type: ignore
 
 class ArticleAdmin(ModelView, model=Article):  # type: ignore
     """Article admin view."""
-
+    name_plural="Unites"
     column_list = [Article.id, Article.tag, Article.product]
     column_details_list = [Article.tag, Article.owner_manufacturer]
     form_columns = [Article.tag, Article.owner_manufacturer, Article.product]

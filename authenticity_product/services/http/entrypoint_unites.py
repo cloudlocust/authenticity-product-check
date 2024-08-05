@@ -12,20 +12,21 @@ articles_router = APIRouter()
 def create_article(article: ArticleCreate, db: Session = Depends(settings.get_db)):
     """Create a new article."""
     dict_article = article.dict()
-    if a := db.query(User).filter(User.email == dict_article["owner_manufacturer_email"]).first():
+    if a := db.query(User).filter(User.email == dict_article["created_by_email"]).first():
         dict_article["owner_manufacturer_id"] = a.id.__str__()
     else:
         raise HTTPException(status_code=404, detail="User not found")
-    dict_article.pop("owner_manufacturer_email")
+    dict_article.pop("created_by_email")
+    dict_article["tag"]=dict_article.pop("status")
     db_article = Article(**dict_article)
     db.add(db_article)
     db.commit()
     db.refresh(db_article)
     return ArticleRead(
         id=db_article.id.__str__(),
-        tag=db_article.tag.__str__(),
+        status=db_article.tag.__str__(),
         product_id=db_article.product_id.__str__(),
-        owner_manufacturer_id=db_article.owner_manufacturer_id.__str__(),
+        created_by_id=db_article.owner_manufacturer_id.__str__(),
     )
 
 
@@ -36,9 +37,9 @@ def read_articles(skip: int = 0, limit: int = 10, db: Session = Depends(settings
     list_articles = [
         ArticleRead(
             id=article.id.__str__(),
-            tag=article.tag.__str__(),
+            status=article.tag.__str__(),
             product_id=article.product_id.__str__(),
-            owner_manufacturer_id=article.owner_manufacturer_id.__str__(),
+            created_by_id=article.owner_manufacturer_id.__str__(),
         )
         for article in articles
     ]
@@ -52,9 +53,9 @@ def read_article(unite_id: str, db: Session = Depends(settings.get_db)):
         raise HTTPException(status_code=404, detail="Article not found")
     return ArticleRead(
         id=article.id.__str__(),
-        tag=article.tag.__str__(),
+        status=article.tag.__str__(),
         product_id=article.product_id.__str__(),
-        owner_manufacturer_id=article.owner_manufacturer_id.__str__(),
+        created_by_id=article.owner_manufacturer_id.__str__(),
     )
 
 
@@ -70,9 +71,9 @@ def update_article(unite_id: str, article: ArticleCreate, db: Session = Depends(
     db.refresh(db_article)
     return ArticleRead(
         id=db_article.id.__str__(),
-        tag=db_article.tag.__str__(),
+        status=db_article.tag.__str__(),
         product_id=db_article.product_id.__str__(),
-        owner_manufacturer_id=db_article.owner_manufacturer_id.__str__(),
+        created_by_id=db_article.owner_manufacturer_id.__str__(),
     )
 
 
@@ -86,9 +87,9 @@ def delete_article(unite_id: str, db: Session = Depends(settings.get_db)):
     db.commit()
     return ArticleRead(
         id=db_article.id.__str__(),
-        tag=db_article.tag.__str__(),
+        status=db_article.tag.__str__(),
         product_id=db_article.product_id.__str__(),
-        owner_manufacturer_id=db_article.owner_manufacturer_id.__str__(),
+        created_by_id=db_article.owner_manufacturer_id.__str__(),
     )
 
 @articles_router.post("/generate_articles", response_model=ListArticlesOutType)
@@ -96,13 +97,13 @@ def generate_articles_by_product( query:GenerateListArticleQuery, db: Session = 
     """Generate a list of articles by product."""
     dict_query = query.dict()
     if a := db.query(User).filter(User.email == dict_query["created_by_email"]).first():
-        dict_query["owner_manufacturer_id"] = a.id.__str__()
+        dict_query["created_by_id"] = a.id.__str__()
     else:
         raise HTTPException(status_code=404, detail="User not found")
     dict_query.pop("created_by_email")
     list_articles = [ Article(
         product_id=dict_query["product_id"],
-        owner_manufacturer_id=dict_query["owner_manufacturer_id"],
+        owner_manufacturer_id=dict_query["created_by_id"],
         tag=dict_query["status"],
 
     ) for i in range(query.nbr_unites)]
@@ -111,9 +112,9 @@ def generate_articles_by_product( query:GenerateListArticleQuery, db: Session = 
     list_articles = [
         ArticleRead(
             id=article.id.__str__(),
-            tag=article.tag.__str__(),
+            status=article.tag.__str__(),
             product_id=article.product_id.__str__(),
-            owner_manufacturer_id=article.owner_manufacturer_id.__str__(),
+            created_by_id=article.owner_manufacturer_id.__str__(),
         )
         for article in list_articles
     ]
