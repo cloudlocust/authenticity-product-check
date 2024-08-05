@@ -63,3 +63,32 @@ class ProductInType(BaseModel):
         """Orm config."""
 
         orm_mode = True
+
+
+class ArticleCreate(BaseModel):
+    """Article schema."""
+    tag: str
+    owner_manufacturer_email: str
+    product_id: int
+
+
+class ArticleRead(BaseModel):
+    """Article read schema."""
+    id: str
+    tag: str
+    owner_manufacturer_id: str | None
+    product_id: int
+
+    class Config:
+        orm_mode = True
+
+
+class ListArticlesOutType(BaseModel):
+    """List of products schema."""
+
+    articles: list[ArticleRead]
+
+    class Config:
+        """Orm config."""
+
+        orm_mode = True
