@@ -99,8 +99,10 @@ class ListArticlesOutType(BaseModel):
 
         orm_mode = True
 
+
 class GenerateListArticleQuery(BaseModel):
     """List of products schema."""
+
     product_id: int
     created_by_email: str
     nbr_unites: int

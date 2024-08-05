@@ -1,7 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from authenticity_product.models import Article, User
-from authenticity_product.schemas import ArticleCreate, ArticleRead, ListArticlesOutType, GenerateListArticleQuery
+from authenticity_product.schemas import (
+    ArticleCreate,
+    ArticleRead,
+    GenerateListArticleQuery,
+    ListArticlesOutType,
+)
 from authenticity_product.services.http.config import settings
 
 
@@ -17,7 +22,7 @@ def create_article(article: ArticleCreate, db: Session = Depends(settings.get_db
     else:
         raise HTTPException(status_code=404, detail="User not found")
     dict_article.pop("created_by_email")
-    dict_article["tag"]=dict_article.pop("status")
+    dict_article["tag"] = dict_article.pop("status")
     db_article = Article(**dict_article)
     db.add(db_article)
     db.commit()
@@ -92,8 +97,11 @@ def delete_article(unite_id: str, db: Session = Depends(settings.get_db)):
         created_by_id=db_article.owner_manufacturer_id.__str__(),
     )
 
+
 @articles_router.post("/generate_articles", response_model=ListArticlesOutType)
-def generate_articles_by_product( query:GenerateListArticleQuery, db: Session = Depends(settings.get_db)):
+def generate_articles_by_product(
+    query: GenerateListArticleQuery, db: Session = Depends(settings.get_db)
+):
     """Generate a list of articles by product."""
     dict_query = query.dict()
     if a := db.query(User).filter(User.email == dict_query["created_by_email"]).first():
@@ -101,12 +109,14 @@ def generate_articles_by_product( query:GenerateListArticleQuery, db: Session = 
     else:
         raise HTTPException(status_code=404, detail="User not found")
     dict_query.pop("created_by_email")
-    list_articles = [ Article(
-        product_id=dict_query["product_id"],
-        owner_manufacturer_id=dict_query["created_by_id"],
-        tag=dict_query["status"],
-
-    ) for i in range(query.nbr_unites)]
+    list_articles = [
+        Article(
+            product_id=dict_query["product_id"],
+            owner_manufacturer_id=dict_query["created_by_id"],
+            tag=dict_query["status"],
+        )
+        for i in range(query.nbr_unites)
+    ]
     db.add_all(list_articles)
     db.commit()
     list_articles = [
