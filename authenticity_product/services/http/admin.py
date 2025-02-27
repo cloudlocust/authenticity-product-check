@@ -3,20 +3,11 @@ import os
 
 import jwt
 import requests
-from fastapi import HTTPException
-from sqladmin import action, ModelView
+from sqladmin import ModelView
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
-from starlette.responses import FileResponse
-from authenticity_product.models import Article, Product, User
+from authenticity_product.models import User
 from authenticity_product.services.http.config import settings
-
-
-class ProductAdmin(ModelView, model=Product):  # type: ignore
-    """Product admin view."""
-
-    column_list = [Product.id, Product.name, Product.description]
-    form_columns = [Product.name, Product.description]
 
 
 class UserAdmin(ModelView, model=User):  # type: ignore
@@ -40,31 +31,6 @@ class UserAdmin(ModelView, model=User):  # type: ignore
         User.civility,
         User.role,
     ]
-
-
-class ArticleAdmin(ModelView, model=Article):  # type: ignore
-    """Article admin view."""
-
-    name_plural = "Unites"
-    column_list = [Article.id, Article.tag, Article.product]
-    column_details_list = [Article.tag, Article.owner_manufacturer]
-    form_columns = [Article.tag, Article.owner_manufacturer, Article.product]
-
-    @action(
-        name="print qr code",
-        label="Qr code",
-        confirmation_message="Are you sure?",
-        add_in_detail=True,
-    )
-    async def print_qr_code(self, request):
-        """Print qr code for the article."""
-        file_path = "/home/khaldi/Downloads/sssssss.pdf"
-
-        if os.path.exists(file_path):
-            return FileResponse(
-                path=file_path, filename="your_file.pdf", media_type="application/pdf"
-            )
-        raise HTTPException(status_code=404, detail="File not found")
 
 
 class AdminAuth(AuthenticationBackend):
