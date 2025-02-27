@@ -71,7 +71,10 @@ def db_dependency(db_dependency_factory):
 def get_test_client(db_dependency):
     async def _get_test_client(app: FastAPI):
         async with LifespanManager(app):
-            async with httpx.AsyncClient(app=app, base_url="http://app.io") as test_client:
+            async with httpx.AsyncClient(
+                transport=httpx.ASGITransport(app=app),  # Correct way to bind an ASGI app
+                base_url="http://app.io",
+            ) as test_client:
                 yield test_client
 
     return _get_test_client
