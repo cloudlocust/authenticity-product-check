@@ -31,9 +31,8 @@ class TestRegister:
         assert data["id"] is not None
 
     async def test_empty_body(self, test_app_client):
-        pass
-        # response = await test_app_client.post("/auth/register", json={})
-        # assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+        response = await test_app_client.post("/auth/register", json={})
+        assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
     async def test_missing_email(self, test_app_client):
         json = {
