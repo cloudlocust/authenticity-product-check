@@ -52,7 +52,7 @@ class JWTStrategy(Strategy[User, UUID]):
                 self.token_audience if self.token_audience is not None else ["fastapi-users:auth"],
                 algorithms=[self.algorithm],
             )
-            if (user_id := data.get("sub")) is None:
+            if (user_id := data.get("id")) is None:
                 return None
         except jwt.PyJWTError:
             return None

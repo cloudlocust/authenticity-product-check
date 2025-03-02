@@ -13,7 +13,7 @@ from authenticity_product.services.http.config import settings
 class UserAdmin(ModelView, model=User):  # type: ignore
     """Product admin view."""
 
-    can_create = False
+    can_create = True
     column_list = [User.email, User.phone, User.first_name, User.role]
     column_details_list = [
         User.email,
