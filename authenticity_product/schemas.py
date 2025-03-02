@@ -8,7 +8,11 @@ from pydantic import EmailStr
 class UserRead(schemas.BaseUser[uuid.UUID]):
     """User read schema."""
 
-    pass  # pylint: disable=unnecessary-pass
+    first_name: str
+    last_name: str
+    phone: str
+    civility: str
+    role: str
 
 
 class UserCreate(schemas.CreateUpdateDictModel):
