@@ -67,6 +67,9 @@ jobs:
 
       - name: Run tests
         env:
-          DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB
+          DB_USER: authenticity_product
+          DB_PASSWORD: authenticity_product
+          DB_NAME: authenticity_product_utest
+          DB_HOST: 127.0.0.1
         run: |
-          echo 'rrrrrrrrrrr'
+          pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
