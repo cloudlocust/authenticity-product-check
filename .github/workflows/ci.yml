@@ -31,6 +31,12 @@ jobs:
       ID: ${{ secrets.GITHUB_RUN_ID }}
 
     steps:
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h 127.0.0.1 -p 5432 -U authenticity_product; do
+            echo "Waiting for database..."
+            sleep 2
+          done
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -58,13 +64,6 @@ jobs:
 
       - name: Install PostgreSQL client
         run: sudo apt-get install -y postgresql-client
-
-      - name: Wait for PostgreSQL
-        run: |
-          until pg_isready -h localhost -p 5432 -U $POSTGRES_USER; do
-            echo "Waiting for database..."
-            sleep 2
-          done
 
       - name: Run tests
         env:
