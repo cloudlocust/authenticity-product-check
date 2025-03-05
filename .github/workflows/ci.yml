@@ -1,0 +1,43 @@
+name: CI Pipeline
+
+on:
+  workflow_dispatch: # trigger manually
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  static_code_analysis:
+    runs-on: ubuntu-latest
+
+    env:
+      ID: ${{ secrets.GITHUB_RUN_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        run: |
+          pipenv --rm || true
+          pipenv install --pre --dev
+
+      - name: Run PyDocStyle
+        run: pipenv run pydocstyle --config=.pydocstyle.ini $MODULE_DIR_NAME
+
+      - name: Run Mypy
+        run: pipenv run mypy -p authenticity_product --config-file mypy.ini --no-incremental --namespace-packages
+
+      - name: Run Pylint
+        run: pipenv run pylint authenticity_product --output-format=parseable --rcfile=.pylintrc
