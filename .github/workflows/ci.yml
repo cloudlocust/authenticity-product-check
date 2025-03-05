@@ -13,7 +13,20 @@ on:
 jobs:
   static_code_analysis:
     runs-on: ubuntu-latest
-
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: authenticity_product
+          POSTGRES_PASSWORD: authenticity_product
+          POSTGRES_DB: authenticity_product_utest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
     env:
       ID: ${{ secrets.GITHUB_RUN_ID }}
 
@@ -42,3 +55,19 @@ jobs:
 
       - name: Run Pylint
         run: pipenv run pylint authenticity_product --output-format=parseable --rcfile=.pylintrc
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h localhost -p 5432 -U $POSTGRES_USER; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@localhost:5432/$POSTGRES_DB
+        run: |
+          echo 'rrrrrrrrrrr'
