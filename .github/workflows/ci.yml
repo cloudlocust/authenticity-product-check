@@ -73,3 +73,10 @@ jobs:
           DB_HOST: 127.0.0.1
         run: |
           pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
+
+      - name: Upload Pytest Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: reports/report.xml
