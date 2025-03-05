@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - master
+      - khaldi/backseed-02
   pull_request:
     branches:
       - master
