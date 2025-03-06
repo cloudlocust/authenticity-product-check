@@ -81,6 +81,11 @@ jobs:
           name: pytest-results
           path: reports/report.xml
 
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
       - name: SonarCloud Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@master
         env:
