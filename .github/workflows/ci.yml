@@ -1,0 +1,92 @@
+name: CI Pipeline
+
+on:
+  workflow_dispatch: # trigger manually
+  push:
+    branches:
+      - master
+      - khaldi/backseed-02
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  static_code_analysis:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: authenticity_product
+          POSTGRES_PASSWORD: authenticity_product
+          POSTGRES_DB: authenticity_product_utest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U test_user"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    env:
+      ID: ${{ secrets.GITHUB_RUN_ID }}
+
+    steps:
+      - name: Wait for PostgreSQL
+        run: |
+          until pg_isready -h 127.0.0.1 -p 5432 -U authenticity_product; do
+            echo "Waiting for database..."
+            sleep 2
+          done
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install pipenv
+        run: pip install pipenv
+
+      - name: Install dependencies
+        run: |
+          pipenv --rm || true
+          pipenv install --pre --dev
+
+      - name: Run PyDocStyle
+        run: pipenv run pydocstyle --config=.pydocstyle.ini $MODULE_DIR_NAME
+
+      - name: Run Mypy
+        run: pipenv run mypy -p authenticity_product --config-file mypy.ini --no-incremental --namespace-packages
+
+      - name: Run Pylint
+        run: pipenv run pylint authenticity_product --output-format=parseable --rcfile=.pylintrc
+
+      - name: Install PostgreSQL client
+        run: sudo apt-get install -y postgresql-client
+
+      - name: Run tests
+        env:
+          DB_USER: authenticity_product
+          DB_PASSWORD: authenticity_product
+          DB_NAME: authenticity_product_utest
+          DB_HOST: 127.0.0.1
+        run: |
+          pipenv run coverage run --source=authenticity_product --concurrency=eventlet -m pytest -x -v --junit-xml=reports/report.xml  tests && pipenv run coverage xml
+
+      - name: Upload Pytest Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-results
+          path: reports/report.xml
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v4
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarCloud Quality Gate
+        uses: sonarsource/sonarqube-quality-gate-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
