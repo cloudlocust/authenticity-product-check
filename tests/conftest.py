@@ -107,7 +107,7 @@ async def fake_user(db_dependency, user_manager, test_app_client):
                 "first_name": "lake",
                 "last_name": "lady",
                 "civility": "Mrs",
-                "phone": "0101010101",
+                "phone": "0664302870",
                 "password": "guinevere",
                 "role": "admin",
             }
