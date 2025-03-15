@@ -85,5 +85,6 @@ jobs:
 
       - name: SonarCloud Quality Gate
         uses: sonarsource/sonarqube-quality-gate-action@master
+        if: github.ref == 'refs/heads/master'
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
