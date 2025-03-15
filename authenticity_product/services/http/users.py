@@ -1,17 +1,18 @@
 """Module contains the user service for the FastAPI application."""
 import uuid
 from collections.abc import AsyncGenerator
-from sqlalchemy.future import select
+
 from fastapi import Depends, Request
-from fastapi_users import BaseUserManager, FastAPIUsers, UUIDIDMixin
+from fastapi_users import BaseUserManager, exceptions, FastAPIUsers, UUIDIDMixin
 from fastapi_users.authentication import AuthenticationBackend, BearerTransport
 from fastapi_users.db import SQLAlchemyUserDatabase
+from sqlalchemy.future import select
 from authenticity_product.models import User
 from authenticity_product.schemas import UserEmailOrPhone
 from authenticity_product.services.http.config import settings
 from authenticity_product.services.http.db_async import get_user_db_async
 from authenticity_product.services.http.strategy import JWTStrategy
-from fastapi_users import exceptions
+
 
 SECRET = "SECRET"
 
@@ -73,6 +74,7 @@ class UserManager(UUIDIDMixin, BaseUserManager[User, uuid.UUID]):
         :return: A user.
         """
         return await self.get_by_email_and_phone(UserEmailOrPhone(user_email))
+
 
 async def get_user_manager(
     user_db: SQLAlchemyUserDatabase[User, uuid.UUID] = Depends(get_user_db_async),

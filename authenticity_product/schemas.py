@@ -1,14 +1,15 @@
 """Authenticity product schemas."""
+import re
 import uuid
 
 from fastapi_users import schemas
-from pydantic import EmailStr
-from pydantic import BaseModel, ValidationError, validator
-import re
+from pydantic import BaseModel, EmailStr, ValidationError, validator
+
 
 # Define regex patterns
-dz_phone_regex = re.compile(r'^(\+213|0)([567])[0-9]{8}$')  # Algerian phone format
-email_regex = re.compile(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+dz_phone_regex = re.compile(r"^(\+213|0)([567])[0-9]{8}$")  # Algerian phone format
+email_regex = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+
 
 class UserEmailOrPhone(str):
     """Custom type to validate either a Saudi Arabian phone number or an email."""
@@ -27,6 +28,7 @@ class UserEmailOrPhone(str):
     def is_email(self):
         """Check if the stored value is an email address."""
         return bool(email_regex.match(self))
+
 
 class UserRead(schemas.BaseUser[uuid.UUID]):
     """User read schema."""
@@ -54,6 +56,7 @@ class UserUpdate(schemas.BaseUserUpdate):
     """User update schema."""
 
     pass  # pylint: disable=unnecessary-pass
+
 
 class PhoneNumberRequest(BaseModel):
     phone_number: str

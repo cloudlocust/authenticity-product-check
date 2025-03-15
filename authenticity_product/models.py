@@ -2,9 +2,10 @@
 from datetime import datetime
 
 from fastapi_users.db import SQLAlchemyBaseUserTableUUID
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String ,Index
+from sqlalchemy import Column, DateTime, ForeignKey, Index, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Mapped
+
 
 class Base:
     """Base model class for resources."""
@@ -35,7 +36,7 @@ class User(DeclarativeBase, SQLAlchemyBaseUserTableUUID):
     role: Mapped[str] = Column(String, ForeignKey("role.name"), nullable=False)
 
     # Optionally, you can explicitly add an index if needed
-    Index('ix_phone', phone)
+    Index("ix_phone", phone)
 
     def __repr__(self) -> str:
         """Return a string representation of the product."""
