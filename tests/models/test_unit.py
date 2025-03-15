@@ -2,7 +2,8 @@ import pytest
 from sqlalchemy import delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import sessionmaker
-from authenticity_product.models import DeclarativeBase, Role
+from authenticity_product.models import DeclarativeBase, Role, User
+from authenticity_product.schemas import UserCreate
 
 
 @pytest.mark.parametrize("name, description", [("mod", "Moderator"), ("admin", "Admin")])
@@ -74,3 +75,45 @@ def test_create_role_with_name_exsting(db_dependency_factory):
         'constraint "role_name_key"\n'
         "DETAIL:  Key (name)=(admin) already exists.\n"
     )
+
+
+@pytest.mark.asyncio
+async def test_user_phone_uniqueness(db_dependency, user_manager, test_app_client):
+    """Test that users cannot be created with duplicate phone numbers."""
+    # Create first user with a phone number
+    user_1 = await user_manager.create(
+        UserCreate(
+            **{
+                "email": "king.arthur@camelot.bt",
+                "first_name": "lake",
+                "last_name": "lady",
+                "civility": "Mrs",
+                "phone": "0664302870",
+                "password": "guinevere",
+                "role": "admin",
+            }
+        )
+    )
+    #
+    # Attempt to create second user with the same phone number
+    user_2_data = UserCreate(
+        **{
+            "email": "merlin@camelot.bt",  # Different email
+            "first_name": "wizard",
+            "last_name": "merlin",
+            "civility": "Mr",
+            "phone": "0664302870",  # Same phone number as user_1
+            "password": "excalibur",
+            "role": "user",
+        }
+    )
+
+    # Should raise an exception due to unique constraint on phone
+    with pytest.raises(Exception) as excinfo:
+        user_2 = await user_manager.create(user_2_data)
+
+    # Verify the error is related to the unique constraint
+    # The exact exception and error message depends on your implementation
+    # It could be IntegrityError from SQLAlchemy or a custom exception from your user manager
+    assert "unique" in str(excinfo.value).lower() or "duplicate" in str(excinfo.value).lower()
+    assert "phone" in str(excinfo.value).lower() or "0664302870" in str(excinfo.value)

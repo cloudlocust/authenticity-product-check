@@ -116,9 +116,27 @@ class TestLogin:
         assert data["detail"] == ErrorCode.LOGIN_BAD_CREDENTIALS
 
     @pytest.mark.parametrize("email", ["king.arthur@camelot.bt", "King.Arthur@camelot.bt"])
-    async def test_valid_credentials_unverified(self, fake_user, email, test_app_client):
+    async def test_valid_credentials_unverified_with_email(self, fake_user, email, test_app_client):
         data = {
             "username": email,
+            "password": "guinevere",
+        }
+        response = await test_app_client.post("/auth/jwt/login", data=data)
+        assert response.status_code == status.HTTP_200_OK
+        decoded = jwt.decode(
+            jwt=response.json()["access_token"],
+            audience=["fastapi-users:auth"],
+            key=settings.public_key,
+            algorithms=["RS256"],
+        )
+        assert decoded["role"] == "admin"
+        assert decoded["id"] == str(fake_user.id)
+        assert decoded["aud"] == ["fastapi-users:auth"]
+
+    @pytest.mark.parametrize("phane", ["0664302870", "0664302870"])
+    async def test_valid_credentials_unverified_with_phane(self, fake_user, phane, test_app_client):
+        data = {
+            "username": phane,
             "password": "guinevere",
         }
         response = await test_app_client.post("/auth/jwt/login", data=data)
