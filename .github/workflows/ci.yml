@@ -9,7 +9,6 @@ on:
 
 jobs:
   static_code_analysis:
-    if: github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
     services:
       postgres:
